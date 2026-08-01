@@ -38,7 +38,6 @@ export default function App() {
         return;
       }
       if (user) {
-        seedIfEmpty();
         iniciarSincronizacao(user.id);
       } else {
         pararSincronizacao();

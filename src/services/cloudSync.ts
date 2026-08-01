@@ -39,6 +39,23 @@ let unsubscribeLocalChanges: (() => void) | null = null;
 let syncingUid: string | null = null;
 let aplicandoRemoto = false;
 
+const CHAVE_ULTIMO_USUARIO = 'zaz_crm_ultimo_usuario_uid';
+
+/**
+ * Se este aparelho tiver dados locais de OUTRA conta (ex.: você testou com
+ * seu login e agora um colega loga com o dele no mesmo celular), apaga os
+ * dados locais antigos antes de carregar os da nova conta — evita que os
+ * dados de um usuário apareçam, mesmo que brevemente, para outro.
+ */
+function limparSeTrocouDeConta(uid: string) {
+  const ultimoUid = window.localStorage.getItem(CHAVE_ULTIMO_USUARIO);
+  if (ultimoUid && ultimoUid !== uid) {
+    CHAVES_SINCRONIZADAS.forEach((chave) => storage.remove(chave));
+    dispatchSyncEvent('*');
+  }
+  window.localStorage.setItem(CHAVE_ULTIMO_USUARIO, uid);
+}
+
 function dispatchSyncEvent(key: string) {
   window.dispatchEvent(new CustomEvent(CLOUD_SYNC_EVENT, { detail: { key } }));
 }
@@ -83,6 +100,9 @@ export async function iniciarSincronizacao(uid: string) {
   if (syncingUid === uid) return; // já sincronizando este usuário
   pararSincronizacao();
   syncingUid = uid;
+
+  // Evita que dados de uma conta anterior usada neste aparelho vazem para a conta atual.
+  limparSeTrocouDeConta(uid);
 
   // 1) Carrega o que já existe na nuvem e sobrescreve o que houver localmente.
   await carregarEstadoInicial(uid);

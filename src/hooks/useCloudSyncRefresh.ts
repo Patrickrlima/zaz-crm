@@ -16,7 +16,7 @@ export function useCloudSyncRefresh(callback: () => void, chave?: string) {
 
     function handler(e: Event) {
       const detail = (e as CustomEvent<{ key: string }>).detail;
-      if (!chave || detail?.key === chave) {
+      if (!chave || detail?.key === chave || detail?.key === '*') {
         callback();
       }
     }

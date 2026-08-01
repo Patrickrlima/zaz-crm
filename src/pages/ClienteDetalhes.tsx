@@ -54,7 +54,7 @@ export default function ClienteDetalhes() {
   useEffect(() => {
     function handler(e: Event) {
       const detail = (e as CustomEvent<{ key: string }>).detail;
-      if (detail?.key === STORAGE_KEYS.clientes) carregar();
+      if (detail?.key === STORAGE_KEYS.clientes || detail?.key === '*') carregar();
     }
     window.addEventListener(CLOUD_SYNC_EVENT, handler);
     return () => window.removeEventListener(CLOUD_SYNC_EVENT, handler);
