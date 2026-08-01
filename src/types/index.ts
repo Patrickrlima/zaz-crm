@@ -27,12 +27,18 @@ export interface Cliente {
   cidade: string;
   estado: string;
   endereco: string;
+  numero?: string;
+  bairro?: string;
+  cep?: string;
   segmento: string;
   status: StatusCliente;
   responsavel: string;
   observacoes: string;
   faturamentoEstimado?: number;
   ticketMedio?: number;
+  situacaoCadastral?: string;
+  cnaePrincipal?: string;
+  dataAbertura?: string;
   dataCadastro: string; // ISO
 }
 

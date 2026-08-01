@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import { useSearchParams } from 'react-router-dom';
 import { Calculator as CalcIcon, Save, FileDown, Trash2, Send } from 'lucide-react';
 import { Calculadora } from '../components/simulador/Calculadora';
@@ -26,9 +27,7 @@ export default function Simulador() {
   const [modalTaxasAberto, setModalTaxasAberto] = useState(false);
   const [mensagem, setMensagem] = useState<string | null>(null);
 
-  useEffect(() => {
-    setClientes(clienteService.listar());
-  }, []);
+  useCloudSyncRefresh(() => setClientes(clienteService.listar()));
 
   useEffect(() => {
     if (mensagem) {

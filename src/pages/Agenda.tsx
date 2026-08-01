@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import { Plus, CalendarDays } from 'lucide-react';
 import { AgendaCalendario } from '../components/agenda/AgendaCalendario';
 import { AgendaCard } from '../components/agenda/AgendaCard';
@@ -29,9 +30,7 @@ export default function Agenda() {
     setClientes(clienteService.listar());
   }
 
-  useEffect(() => {
-    carregar();
-  }, []);
+  useCloudSyncRefresh(carregar);
 
   const eventosFiltrados = useMemo(() => {
     const base = new Date(`${dataSelecionada}T00:00:00`);

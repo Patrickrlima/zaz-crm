@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Download, Upload, Trash2, Save, Moon, Sun } from 'lucide-react';
+import { Download, Upload, Trash2, Save, Moon, Sun, LogOut, Cloud, CloudOff } from 'lucide-react';
 import { usuarioService } from '../services/usuarioService';
 import { storage } from '../services/storage';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { useTheme } from '../contexts/ThemeContext';
+import { authService } from '../services/authService';
 import type { Usuario } from '../types';
 
 export default function Configuracoes() {
   const [usuario, setUsuario] = useState<Usuario>(usuarioService.obter());
-  const [tema, setTema] = useState<'claro' | 'escuro'>('claro');
+  const { tema, setTema } = useTheme();
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [confirmandoLimpeza, setConfirmandoLimpeza] = useState(false);
 
@@ -117,7 +119,7 @@ export default function Configuracoes() {
             <Moon size={16} /> Escuro
           </button>
         </div>
-        <p className="mt-2 text-xs text-ink-faint">O modo escuro completo será disponibilizado em uma próxima versão.</p>
+        <p className="mt-2 text-xs text-ink-faint">O tema escolhido é salvo neste dispositivo e aplicado imediatamente em todas as telas.</p>
       </div>
 
       <div className="card p-5">
@@ -144,6 +146,31 @@ export default function Configuracoes() {
           perder informações.
         </p>
       </div>
+
+      {authService.configurado && (
+        <div className="card p-5">
+          <h3 className="mb-4 flex items-center gap-2 font-semibold text-ink">
+            <Cloud size={16} className="text-brand-green" /> Sincronização em nuvem
+          </h3>
+          <p className="mb-4 text-sm text-ink-soft">
+            Seus dados estão sincronizados em tempo real entre todos os dispositivos onde você fizer login com a
+            mesma conta.
+          </p>
+          <button
+            onClick={() => authService.sair()}
+            className="btn-secondary w-full justify-start text-brand-red hover:bg-red-50"
+          >
+            <LogOut size={16} /> Sair da conta
+          </button>
+        </div>
+      )}
+
+      {!authService.configurado && (
+        <div className="card flex items-center gap-3 p-5 text-sm text-ink-soft">
+          <CloudOff size={16} className="shrink-0 text-ink-faint" />
+          Sincronização em nuvem não configurada neste momento — os dados ficam salvos apenas neste dispositivo.
+        </div>
+      )}
 
       <ConfirmDialog
         open={confirmandoLimpeza}

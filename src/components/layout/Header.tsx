@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Menu, Bell, ChevronDown, LogOut, UserCircle } from 'lucide-react';
 import { initials } from '../../utils/format';
+import { authService } from '../../services/authService';
 import type { Usuario } from '../../types';
 
 interface HeaderProps {
@@ -71,15 +73,21 @@ export function Header({ title, subtitle, usuario, notificationCount = 0, onMenu
             <>
               <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
               <div className="absolute right-0 z-20 mt-2 w-48 rounded-xl border border-gray-100 bg-white p-1.5 shadow-lg">
-                <a
-                  href="/configuracoes"
+                <Link
+                  to="/configuracoes"
+                  onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-soft hover:bg-surface-alt"
                 >
                   <UserCircle size={16} /> Meu perfil
-                </a>
-                <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-brand-red hover:bg-red-50">
-                  <LogOut size={16} /> Sair
-                </button>
+                </Link>
+                {authService.configurado && (
+                  <button
+                    onClick={() => authService.sair()}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-brand-red hover:bg-red-50"
+                  >
+                    <LogOut size={16} /> Sair
+                  </button>
+                )}
               </div>
             </>
           )}

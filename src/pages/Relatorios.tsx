@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import {
   BarChart,
   Bar,
@@ -55,11 +56,11 @@ export default function Relatorios() {
   const [eventos, setEventos] = useState<EventoAgenda[]>([]);
   const [propostas, setPropostas] = useState<Proposta[]>([]);
 
-  useEffect(() => {
+  useCloudSyncRefresh(() => {
     setClientes(clienteService.listar());
     setEventos(agendaService.listar());
     setPropostas(propostaService.listar());
-  }, []);
+  });
 
   const funilData = useMemo(
     () =>

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import { useNavigate } from 'react-router-dom';
 import { DashboardCards } from '../components/dashboard/DashboardCards';
 import { AgendaHoje } from '../components/dashboard/AgendaHoje';
@@ -25,9 +26,7 @@ export default function Dashboard() {
     setRetornos(agendaService.retornosPendentes());
   }
 
-  useEffect(() => {
-    carregar();
-  }, []);
+  useCloudSyncRefresh(carregar);
 
   function handleConcluir(id: string) {
     agendaService.concluir(id);

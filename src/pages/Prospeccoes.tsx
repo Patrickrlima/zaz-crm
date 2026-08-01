@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import { KanbanBoard } from '../components/prospeccoes/KanbanBoard';
 import { clienteService } from '../services/clienteService';
 import type { Cliente, StatusCliente } from '../types';
@@ -10,9 +11,7 @@ export default function Prospeccoes() {
     setClientes(clienteService.listar());
   }
 
-  useEffect(() => {
-    carregar();
-  }, []);
+  useCloudSyncRefresh(carregar);
 
   function handleMudarStatus(clienteId: string, status: StatusCliente) {
     clienteService.atualizarStatus(clienteId, status);

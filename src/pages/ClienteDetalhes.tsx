@@ -18,6 +18,8 @@ import { agendaService } from '../services/agendaService';
 import { propostaService } from '../services/propostaService';
 import { historicoService } from '../services/historicoService';
 import { simuladorService } from '../services/simuladorService';
+import { STORAGE_KEYS } from '../services/storage';
+import { CLOUD_SYNC_EVENT } from '../services/cloudSync';
 import { ClienteStatusBadge } from '../components/ui/StatusBadge';
 import { ClienteForm, type ClienteFormValues } from '../components/clientes/ClienteForm';
 import { ClienteHistorico } from '../components/clientes/ClienteHistorico';
@@ -25,7 +27,7 @@ import { EventoForm, type EventoFormValues } from '../components/agenda/EventoFo
 import { Modal } from '../components/ui/Modal';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { PropostaStatusBadge } from '../components/ui/StatusBadge';
-import { formatCurrency, formatDate, initials } from '../utils/format';
+import { formatCurrency, formatDate, initials, nomeExibicaoCliente } from '../utils/format';
 import type { Cliente } from '../types';
 
 type Aba = 'visao_geral' | 'historico' | 'propostas' | 'tarefas';
@@ -45,6 +47,17 @@ export default function ClienteDetalhes() {
 
   useEffect(() => {
     carregar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  // Reflete edições feitas neste mesmo cliente a partir de outro dispositivo.
+  useEffect(() => {
+    function handler(e: Event) {
+      const detail = (e as CustomEvent<{ key: string }>).detail;
+      if (detail?.key === STORAGE_KEYS.clientes) carregar();
+    }
+    window.addEventListener(CLOUD_SYNC_EVENT, handler);
+    return () => window.removeEventListener(CLOUD_SYNC_EVENT, handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -78,7 +91,7 @@ export default function ClienteDetalhes() {
   function handleNovoEvento(values: EventoFormValues) {
     agendaService.criar({
       clienteId: id!,
-      clienteNome: cliente!.nomeFantasia,
+      clienteNome: nomeExibicaoCliente(cliente!),
       tipo: values.tipo,
       data: values.data,
       hora: values.hora,
@@ -97,11 +110,11 @@ export default function ClienteDetalhes() {
       <div className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-purple-50 text-lg font-semibold text-zaz-purple">
-            {initials(cliente.nomeFantasia) || <Store size={22} />}
+            {initials(nomeExibicaoCliente(cliente)) || <Store size={22} />}
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-semibold text-ink">{cliente.nomeFantasia}</h2>
+              <h2 className="text-lg font-semibold text-ink">{nomeExibicaoCliente(cliente)}</h2>
               <ClienteStatusBadge status={cliente.status} />
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-soft">
@@ -263,7 +276,7 @@ export default function ClienteDetalhes() {
       <ConfirmDialog
         open={modalExcluir}
         title="Excluir cliente"
-        message={`Tem certeza que deseja excluir ${cliente.nomeFantasia}? Essa ação não pode ser desfeita.`}
+        message={`Tem certeza que deseja excluir ${nomeExibicaoCliente(cliente)}? Essa ação não pode ser desfeita.`}
         confirmLabel="Excluir"
         onConfirm={handleExcluir}
         onCancel={() => setModalExcluir(false)}

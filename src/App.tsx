@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { AppLayout } from './components/layout/AppLayout';
 import Dashboard from './pages/Dashboard';
 import Clientes from './pages/Clientes';
@@ -12,11 +13,46 @@ import Historico from './pages/Historico';
 import Relatorios from './pages/Relatorios';
 import Configuracoes from './pages/Configuracoes';
 import { seedIfEmpty } from './services/seedService';
+import { authService } from './services/authService';
+import { iniciarSincronizacao, pararSincronizacao } from './services/cloudSync';
+import { LoginScreen } from './components/auth/LoginScreen';
+import { Loader2 } from 'lucide-react';
 
 export default function App() {
+  const [usuario, setUsuario] = useState<User | null | undefined>(undefined);
+
   useEffect(() => {
-    seedIfEmpty();
+    // Sem Firebase configurado: segue funcionando 100% local (sem tela de login).
+    if (!authService.configurado) {
+      seedIfEmpty();
+      setUsuario(null);
+      return;
+    }
+    const unsubscribe = authService.observar((user) => {
+      setUsuario(user);
+      if (user) {
+        seedIfEmpty();
+        iniciarSincronizacao(user.id);
+      } else {
+        pararSincronizacao();
+      }
+    });
+    return unsubscribe;
   }, []);
+
+  // Ainda verificando se há sessão ativa.
+  if (usuario === undefined) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface-muted">
+        <Loader2 className="animate-spin text-zaz-purple" size={28} />
+      </div>
+    );
+  }
+
+  // Firebase configurado, mas ninguém logado ainda.
+  if (authService.configurado && !usuario) {
+    return <LoginScreen />;
+  }
 
   return (
     <HashRouter>

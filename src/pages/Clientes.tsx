@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import { Plus, Users } from 'lucide-react';
 import { ClienteCard } from '../components/clientes/ClienteCard';
 import { ClienteFiltro } from '../components/clientes/ClienteFiltro';
@@ -18,9 +19,7 @@ export default function Clientes() {
     setClientes(clienteService.listar());
   }
 
-  useEffect(() => {
-    carregar();
-  }, []);
+  useCloudSyncRefresh(carregar);
 
   const filtrados = useMemo(() => {
     return clientes.filter((c) => {

@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import { History, Search } from 'lucide-react';
 import { historicoService } from '../services/historicoService';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -22,9 +24,7 @@ export default function Historico() {
   const [busca, setBusca] = useState('');
   const [tipo, setTipo] = useState<TipoHistorico | 'todos'>('todos');
 
-  useEffect(() => {
-    setRegistros(historicoService.listar());
-  }, []);
+  useCloudSyncRefresh(() => setRegistros(historicoService.listar()));
 
   const filtrados = useMemo(() => {
     return registros.filter((r) => {
@@ -75,7 +75,18 @@ export default function Historico() {
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3">
                     <p className="text-sm font-medium text-ink">
                       {r.titulo}
-                      {r.clienteNome && <span className="ml-1.5 font-normal text-ink-faint">· {r.clienteNome}</span>}
+                      {r.clienteNome && (
+                        <span className="ml-1.5 font-normal text-ink-faint">
+                          ·{' '}
+                          {r.clienteId ? (
+                            <Link to={`/clientes/${r.clienteId}`} className="text-zaz-purple hover:underline">
+                              {r.clienteNome}
+                            </Link>
+                          ) : (
+                            r.clienteNome
+                          )}
+                        </span>
+                      )}
                     </p>
                     <span className="text-xs text-ink-faint">{formatDateTime(r.data)}</span>
                   </div>

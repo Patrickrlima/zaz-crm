@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Store, Phone, MapPin } from 'lucide-react';
 import type { Cliente } from '../../types';
 import { ClienteStatusBadge } from '../ui/StatusBadge';
-import { initials } from '../../utils/format';
+import { initials, nomeExibicaoCliente } from '../../utils/format';
 
 export function ClienteCard({ cliente }: { cliente: Cliente }) {
   return (
@@ -12,10 +12,10 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
     >
       <div className="flex items-start gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-sm font-semibold text-zaz-purple">
-          {initials(cliente.nomeFantasia) || <Store size={18} />}
+          {initials(nomeExibicaoCliente(cliente)) || <Store size={18} />}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium text-ink group-hover:text-zaz-purple">{cliente.nomeFantasia}</p>
+          <p className="truncate font-medium text-ink group-hover:text-zaz-purple">{nomeExibicaoCliente(cliente)}</p>
           <p className="truncate text-xs text-ink-faint">{cliente.segmento}</p>
         </div>
         <ClienteStatusBadge status={cliente.status} />

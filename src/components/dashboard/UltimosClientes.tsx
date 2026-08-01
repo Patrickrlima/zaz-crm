@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Store } from 'lucide-react';
 import type { Cliente } from '../../types';
 import { ClienteStatusBadge } from '../ui/StatusBadge';
-import { formatDate } from '../../utils/format';
+import { formatDate, nomeExibicaoCliente } from '../../utils/format';
 
 export function UltimosClientes({ clientes }: { clientes: Cliente[] }) {
   const recentes = clientes.slice(0, 4);
@@ -27,7 +27,7 @@ export function UltimosClientes({ clientes }: { clientes: Cliente[] }) {
                 <Store size={16} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-ink">{cliente.nomeFantasia}</p>
+                <p className="truncate text-sm font-medium text-ink">{nomeExibicaoCliente(cliente)}</p>
                 <p className="truncate text-xs text-ink-faint">
                   {cliente.cidade} - {cliente.estado}
                 </p>

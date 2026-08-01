@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import { useSearchParams } from 'react-router-dom';
 import { Plus, FileText } from 'lucide-react';
 import { PropostaCard } from '../components/propostas/PropostaCard';
@@ -32,9 +33,7 @@ export default function Propostas() {
     setClientes(clienteService.listar());
   }
 
-  useEffect(() => {
-    carregar();
-  }, []);
+  useCloudSyncRefresh(carregar);
 
   const filtradas = useMemo(
     () => (filtroStatus === 'todos' ? propostas : propostas.filter((p) => p.status === filtroStatus)),
