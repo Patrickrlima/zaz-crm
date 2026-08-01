@@ -28,16 +28,49 @@ function isQuotaError(e: unknown): boolean {
   );
 }
 
+type ChangeListener = (key: string, data: unknown) => void;
+
 class StorageService {
+  private listeners: ChangeListener[] = [];
+  private suppressNotify = false;
+
+  /**
+   * Assina mudanças locais (usado pelo módulo de sincronização em nuvem
+   * para replicar cada gravação local no Firestore). Retorna uma função
+   * para cancelar a assinatura.
+   */
+  onChange(listener: ChangeListener): () => void {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter((l) => l !== listener);
+    };
+  }
+
   /** Salva (substitui) uma lista/objeto inteiro sob uma chave. */
   save<T>(key: StorageKey | string, data: T): void {
     try {
       window.localStorage.setItem(key, JSON.stringify(data));
+      if (!this.suppressNotify) {
+        this.listeners.forEach((l) => l(key, data));
+      }
     } catch (e) {
       if (isQuotaError(e)) {
         console.error('Armazenamento local cheio. Não foi possível salvar os dados.');
       }
       throw e;
+    }
+  }
+
+  /**
+   * Grava dados vindos da nuvem (outro dispositivo) sem disparar uma nova
+   * gravação de volta para a nuvem — evita loop infinito de sincronização.
+   */
+  saveFromRemote<T>(key: StorageKey | string, data: T): void {
+    this.suppressNotify = true;
+    try {
+      this.save(key, data);
+    } finally {
+      this.suppressNotify = false;
     }
   }
 

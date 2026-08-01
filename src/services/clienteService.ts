@@ -1,6 +1,7 @@
 import { storage, STORAGE_KEYS } from './storage';
 import { generateId } from '../utils/id';
 import { historicoService } from './historicoService';
+import { nomeExibicaoCliente } from '../utils/format';
 import type { Cliente, StatusCliente } from '../types';
 
 export type NovoClienteInput = Omit<Cliente, 'id' | 'dataCadastro'>;
@@ -26,9 +27,9 @@ export const clienteService = {
     historicoService.registrar({
       tipo: 'cadastro',
       titulo: 'Cadastro de cliente',
-      descricao: `${cliente.nomeFantasia} foi adicionado como novo cliente.`,
+      descricao: `${nomeExibicaoCliente(cliente)} foi adicionado como novo cliente.`,
       clienteId: cliente.id,
-      clienteNome: cliente.nomeFantasia,
+      clienteNome: nomeExibicaoCliente(cliente),
     });
     return cliente;
   },
@@ -39,9 +40,9 @@ export const clienteService = {
       historicoService.registrar({
         tipo: 'edicao',
         titulo: 'Edição de cliente',
-        descricao: `Dados de ${atualizado.nomeFantasia} foram atualizados.`,
+        descricao: `Dados de ${nomeExibicaoCliente(atualizado)} foram atualizados.`,
         clienteId: atualizado.id,
-        clienteNome: atualizado.nomeFantasia,
+        clienteNome: nomeExibicaoCliente(atualizado),
       });
     }
     return atualizado;
@@ -58,7 +59,7 @@ export const clienteService = {
       historicoService.registrar({
         tipo: 'exclusao',
         titulo: 'Exclusão de cliente',
-        descricao: `${cliente.nomeFantasia} foi removido da base de clientes.`,
+        descricao: `${nomeExibicaoCliente(cliente)} foi removido da base de clientes.`,
       });
     }
   },
