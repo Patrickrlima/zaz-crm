@@ -36,6 +36,11 @@ export function formatPhone(value: string): string {
   return digits.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').trim();
 }
 
+/** Nome de exibição de um cliente com cadastro parcial (campos agora são opcionais). */
+export function nomeExibicaoCliente(cliente: { nomeFantasia?: string; razaoSocial?: string }): string {
+  return cliente.nomeFantasia?.trim() || cliente.razaoSocial?.trim() || 'Cliente sem nome';
+}
+
 export function initials(name: string): string {
   return name
     .split(' ')
