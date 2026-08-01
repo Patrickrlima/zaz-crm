@@ -16,20 +16,27 @@ import { seedIfEmpty } from './services/seedService';
 import { authService } from './services/authService';
 import { iniciarSincronizacao, pararSincronizacao } from './services/cloudSync';
 import { LoginScreen } from './components/auth/LoginScreen';
+import { NovaSenhaScreen } from './components/auth/NovaSenhaScreen';
 import { Loader2 } from 'lucide-react';
 
 export default function App() {
   const [usuario, setUsuario] = useState<User | null | undefined>(undefined);
+  const [modoRecuperacaoSenha, setModoRecuperacaoSenha] = useState(false);
 
   useEffect(() => {
-    // Sem Firebase configurado: segue funcionando 100% local (sem tela de login).
+    // Sem Supabase configurado: segue funcionando 100% local (sem tela de login).
     if (!authService.configurado) {
       seedIfEmpty();
       setUsuario(null);
       return;
     }
-    const unsubscribe = authService.observar((user) => {
+    const unsubscribe = authService.observar((user, evento) => {
       setUsuario(user);
+      // O usuário chegou aqui pelo link de "esqueci minha senha" no e-mail.
+      if (evento === 'PASSWORD_RECOVERY') {
+        setModoRecuperacaoSenha(true);
+        return;
+      }
       if (user) {
         seedIfEmpty();
         iniciarSincronizacao(user.id);
@@ -49,7 +56,19 @@ export default function App() {
     );
   }
 
-  // Firebase configurado, mas ninguém logado ainda.
+  // Veio do link de recuperação de senha por e-mail: pede a nova senha antes de tudo.
+  if (modoRecuperacaoSenha) {
+    return (
+      <NovaSenhaScreen
+        onConcluido={() => {
+          setModoRecuperacaoSenha(false);
+          if (usuario) iniciarSincronizacao(usuario.id);
+        }}
+      />
+    );
+  }
+
+  // Supabase configurado, mas ninguém logado ainda.
   if (authService.configurado && !usuario) {
     return <LoginScreen />;
   }
