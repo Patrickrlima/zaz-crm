@@ -10,6 +10,15 @@
     <title>Central do Vendedor - ZAZ CRM</title>
   </head>
   <body>
+    <script>
+      (function () {
+        try {
+          var salvo = localStorage.getItem('zaz_crm_tema');
+          var escuro = salvo ? salvo === 'escuro' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (escuro) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@theme {
+  --color-zaz-purple: #5B2A86;
+  --color-zaz-purple-dark: #401D61;
+  --color-zaz-purple-light: #7C4DA8;
+
+  --color-brand-blue: #2F6FED;
+  --color-brand-blue-dark: #1E4FBF;
+  --color-brand-green: #16A34A;
+  --color-brand-orange: #F59E0B;
+  --color-brand-red: #EF4444;
+
+  --color-sidebar: #0F1117;
+  --color-sidebar-hover: #1B1E29;
+  --color-sidebar-border: #23262F;
+
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F5F6FA;
+  --color-surface-alt: #EEF0F6;
+
+  --color-ink: #10121A;
+  --color-ink-soft: #5B5F6D;
+  --color-ink-faint: #8A8E9B;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --radius-card: 16px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgba(16, 18, 26, 0.04), 0 8px 24px -12px rgba(16, 18, 26, 0.10);
+  --shadow-card-hover: 0 4px 10px rgba(16, 18, 26, 0.06), 0 16px 32px -12px rgba(16, 18, 26, 0.14);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-surface-muted);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #D7D9E2;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* ===================== Modo escuro ===================== */
+  /* Sobrescreve as variáveis de cor do tema quando a classe .dark
+     está presente em <html>. Como os utilitários do Tailwind (bg-surface,
+     text-ink etc.) referenciam essas variáveis, todas as telas, cards,
+     modais, tabelas e inputs se adaptam automaticamente. */
+  html.dark {
+    --color-surface: #171923;
+    --color-surface-muted: #101119;
+    --color-surface-alt: #1F2230;
+
+    --color-ink: #EDEEF3;
+    --color-ink-soft: #B4B7C4;
+    --color-ink-faint: #767A8A;
+
+    --color-sidebar: #0A0B10;
+    --color-sidebar-hover: #171923;
+    --color-sidebar-border: #23262F;
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.24), 0 8px 24px -12px rgba(0, 0, 0, 0.4);
+    --shadow-card-hover: 0 4px 10px rgba(0, 0, 0, 0.3), 0 16px 32px -12px rgba(0, 0, 0, 0.5);
+  }
+  html.dark .card {
+    border-color: #262A38;
+  }
+  html.dark ::-webkit-scrollbar-thumb {
+    background: #33374A;
+  }
+}
+
+@layer components {
+  .card {
+    background: var(--color-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    border: 1px solid #EFF0F5;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-zaz-purple px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zaz-purple-dark disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-surface-alt;
+  }
+  .input-base {
+    @apply w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint outline-none transition-shadow focus:border-zaz-purple focus:ring-2 focus:ring-zaz-purple/15;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+
+  /* Modo escuro: sobrescreve utilitários estáticos (border-gray-200, bg-white)
+     que não seguem as variáveis de tema automaticamente. */
+  html.dark .card {
+    border-color: #262A38;
+  }
+  html.dark .btn-secondary,
+  html.dark .input-base {
+    background-color: var(--color-surface);
+    border-color: #2B2F3D;
+  }
+  html.dark .input-base:focus {
+    border-color: var(--color-zaz-purple-light);
+  }
+
+  /* Rede de segurança: várias telas usam utilitários estáticos do Tailwind
+     (bg-white, border-gray-100/200, text-gray-*) em vez das variáveis de
+     tema. Isso garante que Dashboard, Clientes, Agenda, Simulador,
+     Histórico, menus, tabelas e cards também respeitem o modo escuro. */
+  html.dark .bg-white {
+    background-color: var(--color-surface);
+  }
+  html.dark .border-gray-100,
+  html.dark .border-gray-200 {
+    border-color: #262A38;
+  }
+  html.dark .bg-gray-50 {
+    background-color: var(--color-surface-alt);
+  }
+  html.dark .text-gray-400,
+  html.dark .text-gray-500 {
+    color: var(--color-ink-faint);
+  }
+  html.dark .text-gray-600,
+  html.dark .text-gray-700,
+  html.dark .text-gray-800,
+  html.dark .text-gray-900 {
+    color: var(--color-ink);
+  }
+}
