@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import { Plus, Users, Upload } from 'lucide-react';
 import { ClienteCard } from '../components/clientes/ClienteCard';
@@ -11,8 +12,9 @@ import { clienteService } from '../services/clienteService';
 import type { Cliente, StatusCliente } from '../types';
 
 export default function Clientes() {
+  const [searchParams] = useSearchParams();
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [busca, setBusca] = useState('');
+  const [busca, setBusca] = useState(() => searchParams.get('q') ?? '');
   const [status, setStatus] = useState<StatusCliente | 'todos'>('todos');
   const [modalAberto, setModalAberto] = useState(false);
   const [modalImportar, setModalImportar] = useState(false);

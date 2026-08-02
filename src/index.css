@@ -112,7 +112,10 @@
   /* ===================== Menu lateral ===================== */
   /* Cantos retos, largura total, tom de azul-marinho sólido. */
   .sidebar-shell {
-    background: var(--color-sidebar);
+    background:
+      radial-gradient(circle at 15% 8%, rgba(255, 255, 255, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 85% 92%, rgba(47, 111, 237, 0.18) 0%, transparent 45%),
+      var(--color-sidebar);
     margin-bottom: 14px;
     border-radius: 0 0 26px 26px;
   }
