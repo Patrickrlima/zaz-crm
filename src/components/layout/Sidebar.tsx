@@ -8,13 +8,17 @@ import {
   History,
   BarChart3,
   Settings,
+  Cloud,
   CloudOff,
   X,
   Calculator,
   ExternalLink,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import zazLogo from '../../assets/zaz-logo.jpg';
+import { authService } from '../../services/authService';
 
 const URL_SIMULADOR_EXTERNO = 'https://patrickrlima.github.io/Simulador-Vero/';
 
@@ -39,9 +43,12 @@ interface SidebarProps {
   open: boolean;
   onClose: () => void;
   collapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-export function Sidebar({ open, onClose, collapsed }: SidebarProps) {
+export function Sidebar({ open, onClose, collapsed, onToggleCollapse }: SidebarProps) {
+  const sincronizando = authService.configurado;
+
   return (
     <>
       {/* overlay mobile */}
@@ -57,10 +64,18 @@ export function Sidebar({ open, onClose, collapsed }: SidebarProps) {
         initial={false}
         animate={{ width: collapsed ? 84 : 264 }}
         transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className={`fixed inset-y-0 left-0 z-40 flex h-full flex-col border-r border-sidebar-border bg-sidebar text-white transition-transform lg:sticky lg:top-0 lg:translate-x-0 ${
+        className={`sidebar-shell fixed inset-y-0 left-0 z-40 flex h-full flex-col border-r border-sidebar-border bg-sidebar text-white transition-transform lg:sticky lg:top-0 lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
+        <button
+          onClick={onToggleCollapse}
+          className="absolute -right-3 top-9 z-10 hidden h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-[#E8823C] text-white shadow-lg transition-transform hover:scale-105 lg:flex"
+          aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+          title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+        >
+          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
         <div className="flex items-center justify-between gap-2 px-5 py-6">
           <div className="flex items-center gap-3 overflow-hidden">
             <img src={zazLogo} alt="ZAZ Vendas" className="h-9 w-9 shrink-0 rounded-lg object-cover" />
@@ -88,9 +103,9 @@ export function Sidebar({ open, onClose, collapsed }: SidebarProps) {
               end={item.to === '/'}
               onClick={onClose}
               className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                `sidebar-navlink group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-zaz-purple text-white'
+                    ? 'sidebar-navlink-active bg-zaz-purple text-white'
                     : 'text-white/70 hover:bg-sidebar-hover hover:text-white'
                 }`
               }
@@ -105,7 +120,7 @@ export function Sidebar({ open, onClose, collapsed }: SidebarProps) {
             href={URL_SIMULADOR_EXTERNO}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-sidebar-hover hover:text-white"
+            className="sidebar-navlink group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-sidebar-hover hover:text-white"
             title={collapsed ? 'Simulador' : undefined}
           >
             <Calculator size={19} className="shrink-0" />
@@ -119,17 +134,27 @@ export function Sidebar({ open, onClose, collapsed }: SidebarProps) {
         </nav>
 
         {!collapsed && (
-          <div className="m-3 rounded-xl border border-sidebar-border bg-sidebar-hover px-4 py-3">
+          <div className="sidebar-footer-card m-3 rounded-xl border border-sidebar-border bg-sidebar-hover px-4 py-3">
             <div className="flex items-center gap-2 text-xs font-medium text-white/80">
-              <CloudOff size={14} className="text-amber-400" />
+              {sincronizando ? (
+                <Cloud size={14} className="text-brand-green" />
+              ) : (
+                <CloudOff size={14} className="text-amber-400" />
+              )}
               Sincronização
             </div>
-            <p className="mt-1 flex items-center gap-1.5 text-xs text-amber-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-              Offline
+            <p
+              className={`mt-1 flex items-center gap-1.5 text-xs ${
+                sincronizando ? 'text-brand-green' : 'text-amber-400'
+              }`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${sincronizando ? 'bg-brand-green' : 'bg-amber-400'}`} />
+              {sincronizando ? 'Em nuvem' : 'Offline'}
             </p>
             <p className="mt-1.5 text-[11px] leading-snug text-white/40">
-              Seus dados estão salvos localmente neste dispositivo.
+              {sincronizando
+                ? 'Seus dados sincronizam automaticamente entre seus dispositivos.'
+                : 'Seus dados estão salvos localmente neste dispositivo.'}
             </p>
           </div>
         )}

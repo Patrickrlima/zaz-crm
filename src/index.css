@@ -154,11 +154,12 @@
     border-color: #23262F;
   }
 
-  /* ===================== Menu lateral no modo escuro ===================== */
+  /* ===================== Menu lateral ===================== */
   /* Visual "flutuante": cartão arredondado com respiro nas bordas e um
-     degradê quente (em vez do roxo chapado do modo claro), inspirado em
-     painéis modernos de dashboard. */
-  html.dark .sidebar-shell {
+     degradê quente, inspirado em painéis modernos de dashboard. O menu
+     lateral sempre foi escuro neste app (independente do tema claro/escuro
+     da tela), então esse visual vale sempre, não só no modo escuro. */
+  .sidebar-shell {
     margin: 12px 0 12px 12px;
     height: calc(100vh - 24px);
     border-radius: 28px;
@@ -166,15 +167,15 @@
     background: linear-gradient(165deg, #2A1B2E 0%, #3B1F2B 32%, #4A2419 62%, #5C2E14 100%);
     box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.3);
   }
-  html.dark .sidebar-shell .sidebar-navlink-active {
+  .sidebar-shell .sidebar-navlink-active {
     background: linear-gradient(135deg, #E8823C, #D9622F);
     color: #fff;
     box-shadow: 0 4px 14px -4px rgba(217, 98, 47, 0.6);
   }
-  html.dark .sidebar-shell .sidebar-navlink:hover:not(.sidebar-navlink-active) {
+  .sidebar-shell .sidebar-navlink:hover:not(.sidebar-navlink-active) {
     background: rgba(255, 255, 255, 0.06);
   }
-  html.dark .sidebar-shell .sidebar-footer-card {
+  .sidebar-shell .sidebar-footer-card {
     background: rgba(0, 0, 0, 0.22);
     border-color: rgba(255, 255, 255, 0.08);
   }
