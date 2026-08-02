@@ -14,7 +14,7 @@ async function carregarLogoBase64(): Promise<string> {
   });
 }
 
-const ROXO: [number, number, number] = [217, 98, 47];
+const ROXO: [number, number, number] = [47, 111, 237];
 const CINZA_ESCURO: [number, number, number] = [16, 18, 26];
 const CINZA: [number, number, number] = [91, 95, 109];
 const CINZA_CLARO: [number, number, number] = [238, 240, 246];

@@ -22,7 +22,7 @@ export function Header({ title, subtitle, usuario, notificationCount = 0, onMenu
   });
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-gray-100 bg-white/90 px-4 py-4 backdrop-blur-sm sm:px-6">
+    <header className="app-header sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-gray-100 bg-white/90 px-4 py-4 backdrop-blur-sm sm:px-6">
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onMenuClick}
@@ -59,9 +59,13 @@ export function Header({ title, subtitle, usuario, notificationCount = 0, onMenu
             onClick={() => setMenuOpen((v) => !v)}
             className="flex items-center gap-2 rounded-xl border border-gray-200 py-1.5 pl-1.5 pr-2 hover:bg-surface-alt"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zaz-purple text-xs font-semibold text-white">
-              {initials(usuario.nome)}
-            </div>
+            {usuario.fotoUrl ? (
+              <img src={usuario.fotoUrl} alt={usuario.nome} className="h-8 w-8 shrink-0 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zaz-purple text-xs font-semibold text-white">
+                {initials(usuario.nome)}
+              </div>
+            )}
             <div className="hidden text-left leading-tight sm:block">
               <p className="text-sm font-medium text-ink">{usuario.nome}</p>
               <p className="text-xs text-ink-soft">{usuario.cargo}</p>

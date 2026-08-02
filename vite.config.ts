@@ -15,7 +15,7 @@ export default defineConfig({
                             name: 'Central do Vendedor - ZAZ CRM',
                             short_name: 'ZAZ CRM',
                             description: 'Plataforma CRM para vendedores externos ZAZ Vendas',
-                            theme_color: '#D9622F',
+                            theme_color: '#2F6FED',
                             background_color: '#0F1117',
                             display: 'standalone',
                             start_url: '/zaz-crm/',

@@ -9,15 +9,15 @@ const STORAGE_KEY_COR = 'zaz_crm_cor_destaque';
 
 /** Cores de destaque prontas para escolher em Configurações → Aparência. */
 export const CORES_DESTAQUE_PRESET: { nome: string; cor: string }[] = [
-  { nome: 'Laranja (padrão)', cor: '#D9622F' },
-  { nome: 'Azul', cor: '#2F6FED' },
+  { nome: 'Azul (padrão)', cor: '#2F6FED' },
+  { nome: 'Laranja', cor: '#D9622F' },
   { nome: 'Verde', cor: '#16A34A' },
   { nome: 'Roxo', cor: '#7C4DA8' },
   { nome: 'Rosa', cor: '#D4537E' },
   { nome: 'Vermelho', cor: '#DC2626' },
 ];
 
-const COR_PADRAO = '#D9622F';
+const COR_PADRAO = '#2F6FED';
 
 interface ThemeContextValue {
   tema: Tema;

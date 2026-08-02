@@ -165,7 +165,7 @@ export default function Relatorios() {
               <XAxis dataKey="mes" tick={{ fontSize: 12 }} stroke="#8A8E9B" />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} stroke="#8A8E9B" />
               <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #EFF0F5', fontSize: 12 }} />
-              <Line type="monotone" dataKey="clientes" stroke="#D9622F" strokeWidth={2.5} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="clientes" stroke="#2F6FED" strokeWidth={2.5} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

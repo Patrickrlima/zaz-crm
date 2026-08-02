@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Download, Upload, Trash2, Save, Moon, Sun, LogOut, Cloud, CloudOff } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Download, Upload, Trash2, Save, Moon, Sun, LogOut, Cloud, CloudOff, Camera, Loader2 } from 'lucide-react';
 import { usuarioService } from '../services/usuarioService';
 import { storage } from '../services/storage';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { useTheme, CORES_DESTAQUE_PRESET } from '../contexts/ThemeContext';
 import { authService } from '../services/authService';
 import { limparDadosDoUsuarioAtual } from '../services/cloudSync';
+import { redimensionarImagemParaBase64 } from '../utils/image';
+import { initials } from '../utils/format';
 import type { Usuario } from '../types';
 
 export default function Configuracoes() {
@@ -13,6 +15,32 @@ export default function Configuracoes() {
   const { tema, setTema, estiloDashboard, setEstiloDashboard, corDestaque, setCorDestaque } = useTheme();
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [confirmandoLimpeza, setConfirmandoLimpeza] = useState(false);
+  const [carregandoFoto, setCarregandoFoto] = useState(false);
+  const inputFotoRef = useRef<HTMLInputElement>(null);
+
+  async function handleSelecionarFoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCarregandoFoto(true);
+    try {
+      const base64 = await redimensionarImagemParaBase64(file);
+      const atualizado = { ...usuario, fotoUrl: base64 };
+      setUsuario(atualizado);
+      usuarioService.salvar(atualizado);
+      setMensagem('Foto atualizada.');
+    } catch {
+      setMensagem('Não foi possível processar essa imagem.');
+    } finally {
+      setCarregandoFoto(false);
+      if (inputFotoRef.current) inputFotoRef.current.value = '';
+    }
+  }
+
+  function handleRemoverFoto() {
+    const atualizado = { ...usuario, fotoUrl: undefined };
+    setUsuario(atualizado);
+    usuarioService.salvar(atualizado);
+  }
 
   useEffect(() => {
     if (mensagem) {
@@ -74,10 +102,39 @@ export default function Configuracoes() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      {mensagem && <div className="rounded-xl bg-orange-50 px-4 py-2.5 text-sm text-zaz-purple">{mensagem}</div>}
+      {mensagem && <div className="rounded-xl bg-accent-soft px-4 py-2.5 text-sm text-zaz-purple">{mensagem}</div>}
 
       <div className="card p-5">
         <h3 className="mb-4 font-semibold text-ink">Dados do usuário</h3>
+        <div className="mb-5 flex items-center gap-4">
+          <div className="relative">
+            {usuario.fotoUrl ? (
+              <img src={usuario.fotoUrl} alt={usuario.nome} className="h-16 w-16 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-soft text-lg font-semibold text-zaz-purple">
+                {initials(usuario.nome) || <Camera size={20} />}
+              </div>
+            )}
+            <button
+              onClick={() => inputFotoRef.current?.click()}
+              disabled={carregandoFoto}
+              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-surface bg-zaz-purple text-white shadow"
+              title="Alterar foto"
+            >
+              {carregandoFoto ? <Loader2 size={13} className="animate-spin" /> : <Camera size={13} />}
+            </button>
+            <input ref={inputFotoRef} type="file" accept="image/*" className="hidden" onChange={handleSelecionarFoto} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-ink">Foto do perfil</p>
+            <p className="text-xs text-ink-faint">Aparece no cabeçalho, ao lado do seu nome.</p>
+            {usuario.fotoUrl && (
+              <button onClick={handleRemoverFoto} className="mt-1 text-xs font-medium text-brand-red hover:underline">
+                Remover foto
+              </button>
+            )}
+          </div>
+        </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-ink">Nome</label>
@@ -116,7 +173,7 @@ export default function Configuracoes() {
           <button
             onClick={() => setTema('claro')}
             className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium ${
-              tema === 'claro' ? 'border-zaz-purple bg-orange-50 text-zaz-purple' : 'border-gray-200 text-ink-soft'
+              tema === 'claro' ? 'border-zaz-purple bg-accent-soft text-zaz-purple' : 'border-gray-200 text-ink-soft'
             }`}
           >
             <Sun size={16} /> Claro
@@ -124,7 +181,7 @@ export default function Configuracoes() {
           <button
             onClick={() => setTema('escuro')}
             className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium ${
-              tema === 'escuro' ? 'border-zaz-purple bg-orange-50 text-zaz-purple' : 'border-gray-200 text-ink-soft'
+              tema === 'escuro' ? 'border-zaz-purple bg-accent-soft text-zaz-purple' : 'border-gray-200 text-ink-soft'
             }`}
           >
             <Moon size={16} /> Escuro
@@ -137,7 +194,7 @@ export default function Configuracoes() {
           <button
             onClick={() => setEstiloDashboard('padrao')}
             className={`rounded-xl border p-3 text-left ${
-              estiloDashboard === 'padrao' ? 'border-zaz-purple bg-orange-50' : 'border-gray-200'
+              estiloDashboard === 'padrao' ? 'border-zaz-purple bg-accent-soft' : 'border-gray-200'
             }`}
           >
             <p className={`text-sm font-medium ${estiloDashboard === 'padrao' ? 'text-zaz-purple' : 'text-ink'}`}>Dashboard padrão</p>
@@ -146,7 +203,7 @@ export default function Configuracoes() {
           <button
             onClick={() => setEstiloDashboard('analitico')}
             className={`rounded-xl border p-3 text-left ${
-              estiloDashboard === 'analitico' ? 'border-zaz-purple bg-orange-50' : 'border-gray-200'
+              estiloDashboard === 'analitico' ? 'border-zaz-purple bg-accent-soft' : 'border-gray-200'
             }`}
           >
             <p className={`text-sm font-medium ${estiloDashboard === 'analitico' ? 'text-zaz-purple' : 'text-ink'}`}>Dashboard analítico</p>
