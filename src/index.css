@@ -186,3 +186,16 @@ html.dark header.app-header {
   background-color: rgba(23, 25, 35, 0.92);
   border-color: #23262F;
 }
+
+/* No celular, campos de formulário com fonte menor que 16px fazem o
+   navegador (Safari/Chrome) dar zoom sozinho ao tocar neles — é isso que
+   causa a tela "mexendo" ao preencher um campo. Aumentando a fonte pra
+   16px só em telas pequenas, o zoom automático some, sem desativar o
+   zoom manual (importante manter para acessibilidade). */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
