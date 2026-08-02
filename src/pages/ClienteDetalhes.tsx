@@ -12,6 +12,7 @@ import {
   CalendarPlus,
   PhoneCall,
   ArrowLeft,
+  ExternalLink,
 } from 'lucide-react';
 import { clienteService } from '../services/clienteService';
 import { agendaService } from '../services/agendaService';
@@ -31,6 +32,12 @@ import { formatCurrency, formatDate, initials, nomeExibicaoCliente } from '../ut
 import type { Cliente } from '../types';
 
 type Aba = 'visao_geral' | 'historico' | 'propostas' | 'tarefas';
+
+const URL_SIMULADOR_EXTERNO = 'https://patrickrlima.github.io/Simulador-Vero/';
+
+function abrirSimuladorExterno() {
+  window.open(URL_SIMULADOR_EXTERNO, '_blank', 'noopener,noreferrer');
+}
 
 export default function ClienteDetalhes() {
   const { id } = useParams<{ id: string }>();
@@ -135,8 +142,8 @@ export default function ClienteDetalhes() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => navigate(`/simulador?clienteId=${id}`)} className="btn-primary">
-          <Calculator size={15} /> Abrir simulador
+        <button onClick={abrirSimuladorExterno} className="btn-primary">
+          <Calculator size={15} /> Abrir simulador <ExternalLink size={13} className="opacity-70" />
         </button>
         <button onClick={() => navigate(`/propostas?novaPara=${id}`)} className="btn-secondary">
           <FileText size={15} /> Nova proposta
@@ -252,8 +259,8 @@ export default function ClienteDetalhes() {
                 ))}
               </div>
             )}
-            <button onClick={() => navigate(`/simulador?clienteId=${id}`)} className="btn-secondary mt-3 w-full">
-              <Calculator size={15} /> Abrir simulador
+            <button onClick={abrirSimuladorExterno} className="btn-secondary mt-3 w-full">
+              <Calculator size={15} /> Abrir simulador <ExternalLink size={13} className="opacity-70" />
             </button>
           </div>
         </div>

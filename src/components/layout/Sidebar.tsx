@@ -10,9 +10,13 @@ import {
   Settings,
   CloudOff,
   X,
+  Calculator,
+  ExternalLink,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import zazLogo from '../../assets/zaz-logo.jpg';
+
+const URL_SIMULADOR_EXTERNO = 'https://patrickrlima.github.io/Simulador-Vero/';
 
 interface NavItem {
   to: string;
@@ -96,6 +100,22 @@ export function Sidebar({ open, onClose, collapsed }: SidebarProps) {
               {!collapsed && <span className="truncate">{item.label}</span>}
             </NavLink>
           ))}
+
+          <a
+            href={URL_SIMULADOR_EXTERNO}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-sidebar-hover hover:text-white"
+            title={collapsed ? 'Simulador' : undefined}
+          >
+            <Calculator size={19} className="shrink-0" />
+            {!collapsed && (
+              <span className="flex flex-1 items-center justify-between truncate">
+                Simulador
+                <ExternalLink size={13} className="opacity-50" />
+              </span>
+            )}
+          </a>
         </nav>
 
         {!collapsed && (

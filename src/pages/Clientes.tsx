@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, Upload } from 'lucide-react';
 import { ClienteCard } from '../components/clientes/ClienteCard';
 import { ClienteFiltro } from '../components/clientes/ClienteFiltro';
 import { ClienteForm, type ClienteFormValues } from '../components/clientes/ClienteForm';
+import { ImportarClientesModal } from '../components/clientes/ImportarClientesModal';
 import { Modal } from '../components/ui/Modal';
 import { EmptyState } from '../components/ui/EmptyState';
 import { clienteService } from '../services/clienteService';
@@ -14,6 +15,7 @@ export default function Clientes() {
   const [busca, setBusca] = useState('');
   const [status, setStatus] = useState<StatusCliente | 'todos'>('todos');
   const [modalAberto, setModalAberto] = useState(false);
+  const [modalImportar, setModalImportar] = useState(false);
 
   function carregar() {
     setClientes(clienteService.listar());
@@ -44,9 +46,14 @@ export default function Clientes() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <ClienteFiltro busca={busca} onBuscaChange={setBusca} status={status} onStatusChange={setStatus} />
-        <button onClick={() => setModalAberto(true)} className="btn-primary shrink-0">
-          <Plus size={16} /> Novo cliente
-        </button>
+        <div className="flex shrink-0 gap-2">
+          <button onClick={() => setModalImportar(true)} className="btn-secondary">
+            <Upload size={16} /> Importar
+          </button>
+          <button onClick={() => setModalAberto(true)} className="btn-primary">
+            <Plus size={16} /> Novo cliente
+          </button>
+        </div>
       </div>
 
       {filtrados.length === 0 ? (
@@ -77,6 +84,12 @@ export default function Clientes() {
       <Modal open={modalAberto} onClose={() => setModalAberto(false)} title="Novo cliente" size="lg">
         <ClienteForm onSubmit={handleCriar} onCancel={() => setModalAberto(false)} />
       </Modal>
+
+      <ImportarClientesModal
+        open={modalImportar}
+        onClose={() => setModalImportar(false)}
+        onImportado={carregar}
+      />
     </div>
   );
 }

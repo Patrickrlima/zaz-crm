@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import {
   BarChart,
@@ -15,9 +15,11 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import { Download, Loader2 } from 'lucide-react';
 import { clienteService } from '../services/clienteService';
 import { agendaService } from '../services/agendaService';
 import { propostaService } from '../services/propostaService';
+import { exportarElementoParaPdf } from '../services/exportPdfService';
 import { KANBAN_COLUNAS, STATUS_CLIENTE_LABEL, STATUS_PROPOSTA_LABEL } from '../types';
 import type { Cliente, EventoAgenda, Proposta } from '../types';
 import { formatCurrency } from '../utils/format';
@@ -55,6 +57,18 @@ export default function Relatorios() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [eventos, setEventos] = useState<EventoAgenda[]>([]);
   const [propostas, setPropostas] = useState<Proposta[]>([]);
+  const [exportando, setExportando] = useState(false);
+  const conteudoRef = useRef<HTMLDivElement>(null);
+
+  async function handleExportarPdf() {
+    if (!conteudoRef.current) return;
+    setExportando(true);
+    try {
+      await exportarElementoParaPdf(conteudoRef.current, `relatorios-zaz-${new Date().toISOString().slice(0, 10)}.pdf`, 'Relatórios — Central do Vendedor');
+    } finally {
+      setExportando(false);
+    }
+  }
 
   useCloudSyncRefresh(() => {
     setClientes(clienteService.listar());
@@ -119,6 +133,14 @@ export default function Relatorios() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <button onClick={handleExportarPdf} disabled={exportando} className="btn-secondary">
+          {exportando ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+          Exportar PDF
+        </button>
+      </div>
+
+      <div ref={conteudoRef} className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="card p-5">
           <p className="text-sm text-ink-soft">Taxa de conversão</p>
@@ -190,6 +212,7 @@ export default function Relatorios() {
             </PieChart>
           </ResponsiveContainer>
         </div>
+      </div>
       </div>
     </div>
   );
