@@ -1,9 +1,13 @@
 import { clienteService } from './clienteService';
+import { propostaService } from './propostaService';
 import type { Cliente, StatusCliente } from '../types';
+
+export type ModoImportacao = 'padrao' | 'pos_venda';
 
 export interface LinhaImportada {
   linha: number;
   dados: Partial<Cliente>;
+  tpvAtual?: number;
   erro?: string;
   acao: 'criar' | 'atualizar' | 'ignorar';
 }
@@ -29,6 +33,7 @@ const ALIASES: Record<keyof Pick<
   | 'segmento'
   | 'responsavel'
   | 'observacoes'
+  | 'mcvComprometido'
 >, string[]> = {
   nomeFantasia: ['nome fantasia', 'nome', 'fantasia', 'empresa', 'cliente'],
   razaoSocial: ['razao social', 'razão social', 'razaosocial'],
@@ -42,7 +47,10 @@ const ALIASES: Record<keyof Pick<
   segmento: ['segmento', 'ramo', 'categoria'],
   responsavel: ['responsavel', 'responsável', 'vendedor'],
   observacoes: ['observacoes', 'observações', 'obs', 'notas'],
+  mcvComprometido: ['mcv comprometido', 'mcv', 'valor comprometido', 'meta mensal'],
 };
+
+const ALIASES_TPV_ATUAL = ['tpv atual', 'tpv', 'valor atual', 'transacionado'];
 
 const STATUS_VALIDOS: StatusCliente[] = [
   'novo_lead',
@@ -76,6 +84,13 @@ function normalizarStatus(valor: string): StatusCliente | undefined {
   return mapa[v];
 }
 
+function paraNumero(valor: string | undefined): number | undefined {
+  if (!valor) return undefined;
+  const limpo = String(valor).replace(/[^\d,.-]/g, '').replace(/\.(?=\d{3},)/g, '').replace(',', '.');
+  const n = parseFloat(limpo);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 /** Lê um arquivo .csv, .xlsx ou .xls e devolve as linhas como objetos (cabeçalho -> valor). */
 export async function lerArquivo(file: File): Promise<Record<string, string>[]> {
   const XLSX = await import('xlsx');
@@ -86,7 +101,7 @@ export async function lerArquivo(file: File): Promise<Record<string, string>[]> 
 }
 
 /** Converte as linhas cruas da planilha em dados de cliente, tentando casar as colunas automaticamente. */
-export function mapearLinhas(linhas: Record<string, string>[]): LinhaImportada[] {
+export function mapearLinhas(linhas: Record<string, string>[], modo: ModoImportacao = 'padrao'): LinhaImportada[] {
   const existentes = clienteService.listar();
   const porCnpj = new Map(existentes.filter((c) => c.cnpj).map((c) => [c.cnpj.replace(/\D/g, ''), c]));
 
@@ -105,6 +120,15 @@ export function mapearLinhas(linhas: Record<string, string>[]): LinhaImportada[]
     const cnpj = pegar('cnpj');
     const statusBruto = colunasNormalizadas.get('status') ?? '';
 
+    let tpvAtual: number | undefined;
+    for (const alias of ALIASES_TPV_ATUAL) {
+      const valor = colunasNormalizadas.get(alias);
+      if (valor) {
+        tpvAtual = paraNumero(valor);
+        break;
+      }
+    }
+
     const dados: Partial<Cliente> = {
       nomeFantasia,
       razaoSocial: pegar('razaoSocial'),
@@ -118,7 +142,9 @@ export function mapearLinhas(linhas: Record<string, string>[]): LinhaImportada[]
       segmento: pegar('segmento'),
       responsavel: pegar('responsavel'),
       observacoes: pegar('observacoes'),
-      status: (statusBruto && normalizarStatus(statusBruto)) || 'novo_lead',
+      status: (statusBruto && normalizarStatus(statusBruto)) || (modo === 'pos_venda' ? 'fechado' : 'novo_lead'),
+      mcvComprometido: paraNumero(pegar('mcvComprometido')),
+      posVenda: modo === 'pos_venda' || undefined,
     };
 
     if (!nomeFantasia && !dados.razaoSocial && !cnpj) {
@@ -128,11 +154,16 @@ export function mapearLinhas(linhas: Record<string, string>[]): LinhaImportada[]
     const cnpjLimpo = cnpj.replace(/\D/g, '');
     const jaExiste = cnpjLimpo && porCnpj.has(cnpjLimpo);
 
-    return { linha: i + 2, dados, acao: jaExiste ? 'atualizar' : 'criar' };
+    return { linha: i + 2, dados, tpvAtual, acao: jaExiste ? 'atualizar' : 'criar' };
   });
 }
 
-/** Executa a importação de fato: cria clientes novos e atualiza os que já existem (casados por CNPJ). */
+/**
+ * Executa a importação de fato: cria clientes novos e atualiza os que já
+ * existem (casados por CNPJ). Quando a linha traz "TPV Atual", cria também
+ * uma proposta "aceita" nesse valor — assim o Dashboard Analítico (que soma
+ * propostas aceitas) já contabiliza o valor sem precisar de um campo extra.
+ */
 export function executarImportacao(linhasImportadas: LinhaImportada[]): ResultadoImportacao {
   const existentes = clienteService.listar();
   const porCnpj = new Map(existentes.filter((c) => c.cnpj).map((c) => [c.cnpj.replace(/\D/g, ''), c]));
@@ -146,31 +177,54 @@ export function executarImportacao(linhasImportadas: LinhaImportada[]): Resultad
       ignorados++;
       continue;
     }
+
+    let clienteId: string | null = null;
+    let clienteNome = item.dados.nomeFantasia || item.dados.razaoSocial || '';
+
     if (item.acao === 'atualizar') {
       const cnpjLimpo = (item.dados.cnpj ?? '').replace(/\D/g, '');
       const existente = porCnpj.get(cnpjLimpo);
       if (existente) {
-        clienteService.atualizar(existente.id, item.dados);
+        const atualizado = clienteService.atualizar(existente.id, item.dados);
+        clienteId = existente.id;
+        clienteNome = atualizado?.nomeFantasia || clienteNome;
         atualizados++;
-        continue;
       }
     }
-    clienteService.criar({
-      nomeFantasia: item.dados.nomeFantasia ?? '',
-      razaoSocial: item.dados.razaoSocial ?? '',
-      cnpj: item.dados.cnpj ?? '',
-      telefone: item.dados.telefone ?? '',
-      whatsapp: item.dados.whatsapp ?? '',
-      email: item.dados.email ?? '',
-      cidade: item.dados.cidade ?? '',
-      estado: item.dados.estado ?? '',
-      endereco: item.dados.endereco ?? '',
-      segmento: item.dados.segmento ?? '',
-      status: item.dados.status ?? 'novo_lead',
-      responsavel: item.dados.responsavel ?? '',
-      observacoes: item.dados.observacoes ?? '',
-    });
-    criados++;
+
+    if (!clienteId) {
+      const criado = clienteService.criar({
+        nomeFantasia: item.dados.nomeFantasia ?? '',
+        razaoSocial: item.dados.razaoSocial ?? '',
+        cnpj: item.dados.cnpj ?? '',
+        telefone: item.dados.telefone ?? '',
+        whatsapp: item.dados.whatsapp ?? '',
+        email: item.dados.email ?? '',
+        cidade: item.dados.cidade ?? '',
+        estado: item.dados.estado ?? '',
+        endereco: item.dados.endereco ?? '',
+        segmento: item.dados.segmento ?? '',
+        status: item.dados.status ?? 'novo_lead',
+        responsavel: item.dados.responsavel ?? '',
+        observacoes: item.dados.observacoes ?? '',
+        mcvComprometido: item.dados.mcvComprometido,
+        posVenda: item.dados.posVenda,
+      });
+      clienteId = criado.id;
+      clienteNome = criado.nomeFantasia;
+      criados++;
+    }
+
+    if (item.tpvAtual && item.tpvAtual > 0 && clienteId) {
+      propostaService.criar({
+        clienteId,
+        clienteNome,
+        valor: item.tpvAtual,
+        parcelamento: 1,
+        taxas: { debito: 0, credito: 0, pix: 0, voucher: 0, banricompras: 0, antecipacao: 0, personalizada: 0 },
+        status: 'aceita',
+      });
+    }
   }
 
   return { criados, atualizados, ignorados };

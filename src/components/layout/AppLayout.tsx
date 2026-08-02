@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { PosVendaPanel } from './PosVendaPanel';
 import { usuarioService } from '../../services/usuarioService';
 import { agendaService } from '../../services/agendaService';
 
@@ -29,6 +30,7 @@ function tituloParaRota(pathname: string): { title: string; subtitle?: string } 
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [posVendaAberto, setPosVendaAberto] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     const salvo = window.localStorage.getItem(SIDEBAR_COLAPSADO_KEY);
     return salvo !== null ? salvo === '1' : false;
@@ -59,6 +61,17 @@ export function AppLayout() {
     });
   }
 
+  // No computador a barra lateral já fica sempre visível, então o botão de
+  // "menu" (☰) fica sem função — aproveitamos ele para abrir o Pós-venda.
+  // No celular ele continua abrindo a gaveta do menu, como sempre.
+  function handleMenuClick() {
+    if (window.innerWidth >= 1024) {
+      setPosVendaAberto(true);
+    } else {
+      setSidebarOpen((v) => !v);
+    }
+  }
+
   const { title, subtitle } = tituloParaRota(location.pathname);
 
   return (
@@ -76,7 +89,7 @@ export function AppLayout() {
           subtitle={subtitle}
           usuario={usuario}
           notificationCount={retornosHoje}
-          onMenuClick={() => setSidebarOpen((v) => !v)}
+          onMenuClick={handleMenuClick}
         />
 
         <main className="flex-1 px-4 py-5 sm:px-6 sm:py-6">
@@ -95,6 +108,8 @@ export function AppLayout() {
 
         <Footer />
       </div>
+
+      <PosVendaPanel open={posVendaAberto} onClose={() => setPosVendaAberto(false)} />
     </div>
   );
 }

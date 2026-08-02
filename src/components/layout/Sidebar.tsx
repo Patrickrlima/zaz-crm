@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -19,6 +20,9 @@ import {
 import { motion } from 'framer-motion';
 import zazLogo from '../../assets/zaz-logo.jpg';
 import { authService } from '../../services/authService';
+import { usuarioService } from '../../services/usuarioService';
+import { STORAGE_KEYS } from '../../services/storage';
+import { CLOUD_SYNC_EVENT } from '../../services/cloudSync';
 
 const URL_SIMULADOR_EXTERNO = 'https://patrickrlima.github.io/Simulador-Vero/';
 
@@ -52,6 +56,22 @@ function Secao({ titulo, collapsed }: { titulo: string; collapsed: boolean }) {
 
 export function Sidebar({ open, onClose, collapsed, onToggleCollapse }: SidebarProps) {
   const sincronizando = authService.configurado;
+  const [usuario, setUsuario] = useState(() => usuarioService.obter());
+
+  useEffect(() => {
+    function handler(e: Event) {
+      const detail = (e as CustomEvent<{ key: string }>).detail;
+      if (!detail || detail.key === STORAGE_KEYS.usuario || detail.key === '*') {
+        setUsuario(usuarioService.obter());
+      }
+    }
+    window.addEventListener(CLOUD_SYNC_EVENT, handler);
+    window.addEventListener('zaz-usuario-atualizado', handler);
+    return () => {
+      window.removeEventListener(CLOUD_SYNC_EVENT, handler);
+      window.removeEventListener('zaz-usuario-atualizado', handler);
+    };
+  }, []);
 
   const classeLink = ({ isActive }: { isActive: boolean }) =>
     `sidebar-navlink group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
@@ -87,9 +107,15 @@ export function Sidebar({ open, onClose, collapsed, onToggleCollapse }: SidebarP
         </button>
         <div className="flex items-center justify-between gap-2 px-5 py-6">
           <div className="flex items-center gap-3 overflow-hidden">
-            <img src={zazLogo} alt="ZAZ Vendas" className="h-9 w-9 shrink-0 rounded-lg object-cover" />
+            {usuario.fotoUrl ? (
+              <img src={usuario.fotoUrl} alt={usuario.nome} className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-white/15" />
+            ) : (
+              <img src={zazLogo} alt="ZAZ Vendas" className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-white/15" />
+            )}
             {!collapsed && (
-              <p className="text-xs font-semibold leading-tight text-white">Gestão de Clientes e Prospecções</p>
+              <p className="text-[15px] font-semibold leading-tight tracking-tight text-white">
+                Gestão de Clientes<br />e Prospecções
+              </p>
             )}
           </div>
           <button

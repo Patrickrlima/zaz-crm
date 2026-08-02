@@ -15,10 +15,13 @@ export const usuarioService = {
 
   salvar(usuario: Usuario): void {
     storage.save(STORAGE_KEYS.usuario, usuario);
+    window.dispatchEvent(new Event('zaz-usuario-atualizado'));
   },
 
   atualizar(partial: Partial<Usuario>): Usuario {
-    return storage.update<Usuario>(STORAGE_KEYS.usuario, partial);
+    const atualizado = storage.update<Usuario>(STORAGE_KEYS.usuario, partial);
+    window.dispatchEvent(new Event('zaz-usuario-atualizado'));
+    return atualizado;
   },
 };
 

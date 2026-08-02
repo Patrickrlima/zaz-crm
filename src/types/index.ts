@@ -40,6 +40,8 @@ export interface Cliente {
   situacaoCadastral?: string;
   cnaePrincipal?: string;
   dataAbertura?: string;
+  /** Cliente vindo da planilha de pós-venda (conta nas métricas do Dashboard Analítico). */
+  posVenda?: boolean;
   dataCadastro: string; // ISO
 }
 

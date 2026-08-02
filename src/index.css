@@ -166,6 +166,8 @@
   /* Cantos retos, largura total, tom de azul-marinho sólido. */
   .sidebar-shell {
     background: var(--color-sidebar);
+    margin-bottom: 14px;
+    border-radius: 0 0 26px 26px;
   }
   .sidebar-shell .sidebar-navlink-active {
     background: #fff;

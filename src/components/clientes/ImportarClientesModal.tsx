@@ -1,16 +1,24 @@
 import { useRef, useState } from 'react';
 import { UploadCloud, FileSpreadsheet, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Modal } from '../ui/Modal';
-import { lerArquivo, mapearLinhas, executarImportacao, type LinhaImportada, type ResultadoImportacao } from '../../services/importService';
+import {
+  lerArquivo,
+  mapearLinhas,
+  executarImportacao,
+  type LinhaImportada,
+  type ResultadoImportacao,
+  type ModoImportacao,
+} from '../../services/importService';
 import { nomeExibicaoCliente } from '../../utils/format';
 
 interface ImportarClientesModalProps {
   open: boolean;
   onClose: () => void;
   onImportado: () => void;
+  modo?: ModoImportacao;
 }
 
-export function ImportarClientesModal({ open, onClose, onImportado }: ImportarClientesModalProps) {
+export function ImportarClientesModal({ open, onClose, onImportado, modo = 'padrao' }: ImportarClientesModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -39,7 +47,7 @@ export function ImportarClientesModal({ open, onClose, onImportado }: ImportarCl
         setErro('Não encontramos nenhuma linha de dados nesse arquivo.');
         return;
       }
-      setLinhas(mapearLinhas(linhasCruas));
+      setLinhas(mapearLinhas(linhasCruas, modo));
     } catch {
       setErro('Não foi possível ler esse arquivo. Confira se é um .csv, .xlsx ou .xls válido.');
     } finally {
@@ -65,7 +73,7 @@ export function ImportarClientesModal({ open, onClose, onImportado }: ImportarCl
   const ignoradas = linhas?.filter((l) => l.acao === 'ignorar').length ?? 0;
 
   return (
-    <Modal open={open} onClose={handleFechar} title="Importar clientes" size="lg">
+    <Modal open={open} onClose={handleFechar} title={modo === 'pos_venda' ? 'Importar planilha de pós-venda' : 'Importar clientes'} size="lg">
       {resultado ? (
         <div className="py-6 text-center">
           <CheckCircle2 className="mx-auto mb-3 text-brand-green" size={32} />
@@ -88,7 +96,7 @@ export function ImportarClientesModal({ open, onClose, onImportado }: ImportarCl
               const file = e.dataTransfer.files?.[0];
               if (file) handleArquivo(file);
             }}
-            className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-surface-alt/40 px-6 py-12 text-center transition-colors hover:border-zaz-purple hover:bg-purple-50/40"
+            className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-surface-alt/40 px-6 py-12 text-center transition-colors hover:border-zaz-purple hover:bg-accent-soft/40"
           >
             {carregando ? (
               <Loader2 className="animate-spin text-zaz-purple" size={28} />
@@ -118,8 +126,16 @@ export function ImportarClientesModal({ open, onClose, onImportado }: ImportarCl
           <div className="mt-4 rounded-xl bg-surface-alt/60 p-3 text-xs text-ink-faint">
             <p className="mb-1 font-medium text-ink-soft">Colunas reconhecidas automaticamente:</p>
             Nome/Nome Fantasia, Razão Social, CNPJ, Telefone, WhatsApp, E-mail, Cidade, Estado/UF, Endereço,
-            Segmento, Status, Responsável, Observações — não precisa estar na ordem certa, nem com todos os
+            Segmento, Status, Responsável, Observações, MCV comprometido
+            {modo === 'pos_venda' && ', TPV Atual'} — não precisa estar na ordem certa, nem com todos os
             campos preenchidos. Clientes com o mesmo CNPJ de um já cadastrado são atualizados em vez de duplicados.
+            {modo === 'pos_venda' && (
+              <p className="mt-2">
+                Esses clientes entram marcados como <strong>pós-venda</strong> e já aparecem no Dashboard Analítico.
+                Se a planilha tiver uma coluna de <strong>TPV Atual</strong>, criamos automaticamente uma proposta
+                "aceita" nesse valor para cada um.
+              </p>
+            )}
           </div>
         </div>
       ) : (
