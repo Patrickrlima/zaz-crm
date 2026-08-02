@@ -79,9 +79,6 @@
     --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.24), 0 8px 24px -12px rgba(0, 0, 0, 0.4);
     --shadow-card-hover: 0 4px 10px rgba(0, 0, 0, 0.3), 0 16px 32px -12px rgba(0, 0, 0, 0.5);
   }
-  html.dark .card {
-    border-color: #262A38;
-  }
   html.dark ::-webkit-scrollbar-thumb {
     background: #33374A;
   }
@@ -111,56 +108,6 @@
   .bg-accent-soft {
     background-color: color-mix(in srgb, var(--color-zaz-purple) 12%, white);
   }
-  html.dark .bg-accent-soft {
-    background-color: color-mix(in srgb, var(--color-zaz-purple) 22%, black);
-  }
-
-  /* Modo escuro: sobrescreve utilitários estáticos (border-gray-200, bg-white)
-     que não seguem as variáveis de tema automaticamente. */
-  html.dark .card {
-    border-color: #262A38;
-  }
-  html.dark .btn-secondary,
-  html.dark .input-base {
-    background-color: var(--color-surface);
-    border-color: #2B2F3D;
-  }
-  html.dark .input-base:focus {
-    border-color: var(--color-zaz-purple-light);
-  }
-
-  /* Rede de segurança: várias telas usam utilitários estáticos do Tailwind
-     (bg-white, border-gray-100/200, text-gray-*) em vez das variáveis de
-     tema. Isso garante que Dashboard, Clientes, Agenda, Simulador,
-     Histórico, menus, tabelas e cards também respeitem o modo escuro. */
-  html.dark .bg-white {
-    background-color: var(--color-surface);
-  }
-  html.dark .border-gray-100,
-  html.dark .border-gray-200 {
-    border-color: #262A38;
-  }
-  html.dark .bg-gray-50 {
-    background-color: var(--color-surface-alt);
-  }
-  html.dark .text-gray-400,
-  html.dark .text-gray-500 {
-    color: var(--color-ink-faint);
-  }
-  html.dark .text-gray-600,
-  html.dark .text-gray-700,
-  html.dark .text-gray-800,
-  html.dark .text-gray-900 {
-    color: var(--color-ink);
-  }
-
-  /* Cabeçalho: usa bg-white/90 (Tailwind opacity variant), que a rede de
-     segurança acima não alcança porque gera uma classe diferente de
-     .bg-white. Definimos a cor certa direto por seletor de tag. */
-  html.dark header.app-header {
-    background-color: rgba(23, 25, 35, 0.88);
-    border-color: #23262F;
-  }
 
   /* ===================== Menu lateral ===================== */
   /* Cantos retos, largura total, tom de azul-marinho sólido. */
@@ -184,4 +131,55 @@
   .sidebar-shell .sidebar-footer-card span:not(.sync-dot) {
     color: var(--color-ink-soft);
   }
+}
+
+/*
+ * ===================== Correções de modo escuro (fora de @layer) =====================
+ * IMPORTANTE: estas regras ficam DE PROPÓSITO fora de qualquer @layer.
+ * O Tailwind v4 organiza suas próprias classes (bg-white, border-gray-200,
+ * text-gray-500 etc.) dentro de uma camada "utilities" que tem prioridade
+ * automática sobre QUALQUER regra dentro de @layer base/components,
+ * não importa a especificidade do seletor. Colocando essas correções aqui,
+ * fora de camada nenhuma, elas sempre vencem — é a única forma confiável
+ * de sobrescrever uma utilidade do Tailwind globalmente pelo modo escuro.
+ */
+html.dark .card {
+  border-color: #262A38;
+}
+html.dark .btn-secondary,
+html.dark .input-base {
+  background-color: var(--color-surface);
+  border-color: #2B2F3D;
+}
+html.dark .input-base:focus {
+  border-color: var(--color-zaz-purple-light);
+}
+html.dark .bg-accent-soft {
+  background-color: color-mix(in srgb, var(--color-zaz-purple) 22%, black);
+}
+html.dark .bg-white {
+  background-color: var(--color-surface);
+}
+html.dark .border-gray-100,
+html.dark .border-gray-200 {
+  border-color: #262A38;
+}
+html.dark .bg-gray-50 {
+  background-color: var(--color-surface-alt);
+}
+html.dark .text-gray-400,
+html.dark .text-gray-500 {
+  color: var(--color-ink-faint);
+}
+html.dark .text-gray-600,
+html.dark .text-gray-700,
+html.dark .text-gray-800,
+html.dark .text-gray-900 {
+  color: var(--color-ink);
+}
+/* Cabeçalho: usa bg-white/90 (variante de opacidade do Tailwind), então
+   definimos a cor certa direto por seletor de tag + classe própria. */
+html.dark header.app-header {
+  background-color: rgba(23, 25, 35, 0.92);
+  border-color: #23262F;
 }

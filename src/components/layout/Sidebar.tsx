@@ -16,6 +16,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  Handshake,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import zazLogo from '../../assets/zaz-logo.jpg';
@@ -37,6 +38,7 @@ const NAV_PRINCIPAL: NavItem[] = [
   { to: '/clientes', label: 'Clientes', icon: Users },
   { to: '/agenda', label: 'Agenda', icon: Calendar },
   { to: '/prospeccoes', label: 'Prospecções', icon: Target },
+  { to: '/pos-venda', label: 'Pós-venda', icon: Handshake },
   { to: '/propostas', label: 'Propostas', icon: FileText },
   { to: '/historico', label: 'Histórico', icon: History },
   { to: '/relatorios', label: 'Relatórios', icon: BarChart3 },
