@@ -32,6 +32,7 @@ const schema = z.object({
   observacoes: z.string(),
   faturamentoEstimado: z.number().optional(),
   ticketMedio: z.number().optional(),
+  mcvComprometido: z.number().optional(),
 });
 
 export type ClienteFormValues = z.infer<typeof schema>;
@@ -268,6 +269,16 @@ export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
             step="0.01"
             className="input-base"
             {...register('ticketMedio', { valueAsNumber: true })}
+          />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-ink">MCV comprometido (R$/mês)</label>
+          <input
+            type="number"
+            step="0.01"
+            className="input-base"
+            placeholder="Valor que o cliente se comprometeu a transacionar"
+            {...register('mcvComprometido', { valueAsNumber: true })}
           />
         </div>
 

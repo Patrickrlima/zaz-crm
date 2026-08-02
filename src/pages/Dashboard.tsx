@@ -6,24 +6,32 @@ import { AgendaHoje } from '../components/dashboard/AgendaHoje';
 import { FunilVendas } from '../components/dashboard/FunilVendas';
 import { UltimosClientes } from '../components/dashboard/UltimosClientes';
 import { RetornosPendentes } from '../components/dashboard/RetornosPendentes';
+import { DashboardAnalitico } from '../components/dashboard/DashboardAnalitico';
 import { Modal } from '../components/ui/Modal';
 import { EventoForm, type EventoFormValues } from '../components/agenda/EventoForm';
 import { clienteService } from '../services/clienteService';
 import { agendaService } from '../services/agendaService';
 import { propostaService } from '../services/propostaService';
-import type { Cliente, EventoAgenda } from '../types';
+import { historicoService } from '../services/historicoService';
+import { useTheme } from '../contexts/ThemeContext';
+import type { Cliente, EventoAgenda, Proposta, RegistroHistorico } from '../types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { estiloDashboard } = useTheme();
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [eventosHoje, setEventosHoje] = useState<EventoAgenda[]>([]);
   const [retornos, setRetornos] = useState<EventoAgenda[]>([]);
+  const [propostas, setPropostas] = useState<Proposta[]>([]);
+  const [historico, setHistorico] = useState<RegistroHistorico[]>([]);
   const [modalAberto, setModalAberto] = useState(false);
 
   function carregar() {
     setClientes(clienteService.listar());
     setEventosHoje(agendaService.listarHoje());
     setRetornos(agendaService.retornosPendentes());
+    setPropostas(propostaService.listar());
+    setHistorico(historicoService.listar());
   }
 
   useCloudSyncRefresh(carregar);
@@ -45,6 +53,10 @@ export default function Dashboard() {
     });
     setModalAberto(false);
     carregar();
+  }
+
+  if (estiloDashboard === 'analitico') {
+    return <DashboardAnalitico clientes={clientes} propostas={propostas} historico={historico} />;
   }
 
   const negociacoes = clientes.filter((c) => c.status === 'negociacao').length;

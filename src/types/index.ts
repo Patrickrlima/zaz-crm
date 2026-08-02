@@ -35,6 +35,7 @@ export interface Cliente {
   responsavel: string;
   observacoes: string;
   faturamentoEstimado?: number;
+  mcvComprometido?: number;
   ticketMedio?: number;
   situacaoCadastral?: string;
   cnaePrincipal?: string;

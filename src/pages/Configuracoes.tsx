@@ -3,14 +3,14 @@ import { Download, Upload, Trash2, Save, Moon, Sun, LogOut, Cloud, CloudOff } fr
 import { usuarioService } from '../services/usuarioService';
 import { storage } from '../services/storage';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme, CORES_DESTAQUE_PRESET } from '../contexts/ThemeContext';
 import { authService } from '../services/authService';
 import { limparDadosDoUsuarioAtual } from '../services/cloudSync';
 import type { Usuario } from '../types';
 
 export default function Configuracoes() {
   const [usuario, setUsuario] = useState<Usuario>(usuarioService.obter());
-  const { tema, setTema } = useTheme();
+  const { tema, setTema, estiloDashboard, setEstiloDashboard, corDestaque, setCorDestaque } = useTheme();
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [confirmandoLimpeza, setConfirmandoLimpeza] = useState(false);
 
@@ -131,6 +131,55 @@ export default function Configuracoes() {
           </button>
         </div>
         <p className="mt-2 text-xs text-ink-faint">O tema escolhido é salvo neste dispositivo e aplicado imediatamente em todas as telas.</p>
+
+        <h4 className="mb-3 mt-6 text-sm font-medium text-ink">Estilo do Dashboard</h4>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button
+            onClick={() => setEstiloDashboard('padrao')}
+            className={`rounded-xl border p-3 text-left ${
+              estiloDashboard === 'padrao' ? 'border-zaz-purple bg-orange-50' : 'border-gray-200'
+            }`}
+          >
+            <p className={`text-sm font-medium ${estiloDashboard === 'padrao' ? 'text-zaz-purple' : 'text-ink'}`}>Dashboard padrão</p>
+            <p className="mt-0.5 text-xs text-ink-faint">Agenda do dia, funil de vendas e últimos clientes.</p>
+          </button>
+          <button
+            onClick={() => setEstiloDashboard('analitico')}
+            className={`rounded-xl border p-3 text-left ${
+              estiloDashboard === 'analitico' ? 'border-zaz-purple bg-orange-50' : 'border-gray-200'
+            }`}
+          >
+            <p className={`text-sm font-medium ${estiloDashboard === 'analitico' ? 'text-zaz-purple' : 'text-ink'}`}>Dashboard analítico</p>
+            <p className="mt-0.5 text-xs text-ink-faint">MCV comprometido, TPV atual/projetado, ranking e alertas.</p>
+          </button>
+        </div>
+
+        <h4 className="mb-3 mt-6 text-sm font-medium text-ink">Cor de destaque</h4>
+        <div className="flex flex-wrap gap-2">
+          {CORES_DESTAQUE_PRESET.map((c) => (
+            <button
+              key={c.cor}
+              onClick={() => setCorDestaque(c.cor)}
+              title={c.nome}
+              className={`h-9 w-9 rounded-full border-2 transition-transform hover:scale-110 ${
+                corDestaque.toLowerCase() === c.cor.toLowerCase() ? 'border-ink' : 'border-transparent'
+              }`}
+              style={{ backgroundColor: c.cor }}
+            />
+          ))}
+          <label
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-dashed border-gray-300 text-ink-faint"
+            title="Cor personalizada"
+          >
+            +
+            <input
+              type="color"
+              value={corDestaque}
+              onChange={(e) => setCorDestaque(e.target.value)}
+              className="sr-only"
+            />
+          </label>
+        </div>
       </div>
 
       <div className="card p-5">
