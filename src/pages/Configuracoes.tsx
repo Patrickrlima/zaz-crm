@@ -5,6 +5,7 @@ import { storage } from '../services/storage';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { useTheme } from '../contexts/ThemeContext';
 import { authService } from '../services/authService';
+import { limparDadosDoUsuarioAtual } from '../services/cloudSync';
 import type { Usuario } from '../types';
 
 export default function Configuracoes() {
@@ -54,16 +55,26 @@ export default function Configuracoes() {
     e.target.value = '';
   }
 
-  function handleLimparDados() {
-    storage.clear();
+  async function handleLimparDados() {
     setConfirmandoLimpeza(false);
-    setMensagem('Todos os dados locais foram apagados.');
+    setMensagem('Apagando dados...');
+    try {
+      if (authService.configurado) {
+        await limparDadosDoUsuarioAtual();
+      } else {
+        storage.clear();
+      }
+      setMensagem('Todos os dados foram apagados.');
+    } catch {
+      setMensagem('Não foi possível apagar os dados na nuvem. Verifique sua conexão e tente novamente.');
+      return;
+    }
     setTimeout(() => window.location.reload(), 1200);
   }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      {mensagem && <div className="rounded-xl bg-purple-50 px-4 py-2.5 text-sm text-zaz-purple">{mensagem}</div>}
+      {mensagem && <div className="rounded-xl bg-orange-50 px-4 py-2.5 text-sm text-zaz-purple">{mensagem}</div>}
 
       <div className="card p-5">
         <h3 className="mb-4 font-semibold text-ink">Dados do usuário</h3>
@@ -105,7 +116,7 @@ export default function Configuracoes() {
           <button
             onClick={() => setTema('claro')}
             className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium ${
-              tema === 'claro' ? 'border-zaz-purple bg-purple-50 text-zaz-purple' : 'border-gray-200 text-ink-soft'
+              tema === 'claro' ? 'border-zaz-purple bg-orange-50 text-zaz-purple' : 'border-gray-200 text-ink-soft'
             }`}
           >
             <Sun size={16} /> Claro
@@ -113,7 +124,7 @@ export default function Configuracoes() {
           <button
             onClick={() => setTema('escuro')}
             className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium ${
-              tema === 'escuro' ? 'border-zaz-purple bg-purple-50 text-zaz-purple' : 'border-gray-200 text-ink-soft'
+              tema === 'escuro' ? 'border-zaz-purple bg-orange-50 text-zaz-purple' : 'border-gray-200 text-ink-soft'
             }`}
           >
             <Moon size={16} /> Escuro
@@ -142,8 +153,9 @@ export default function Configuracoes() {
           </button>
         </div>
         <p className="mt-3 text-xs text-ink-faint">
-          Todos os dados são armazenados apenas neste dispositivo (LocalStorage). Faça backups regulares para não
-          perder informações.
+          {authService.configurado
+            ? 'Seus dados ficam salvos na nuvem (Supabase) e sincronizados entre seus dispositivos. "Limpar todos os dados" apaga em definitivo, na nuvem e em todos os aparelhos.'
+            : 'Todos os dados são armazenados apenas neste dispositivo (LocalStorage). Faça backups regulares para não perder informações.'}
         </p>
       </div>
 

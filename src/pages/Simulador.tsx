@@ -124,7 +124,7 @@ export default function Simulador() {
       </div>
 
       {mensagem && (
-        <div className="rounded-xl bg-purple-50 px-4 py-2.5 text-sm text-zaz-purple">{mensagem}</div>
+        <div className="rounded-xl bg-orange-50 px-4 py-2.5 text-sm text-zaz-purple">{mensagem}</div>
       )}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">

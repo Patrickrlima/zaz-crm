@@ -147,3 +147,22 @@ export function pararSincronizacao() {
   }
   syncingUid = null;
 }
+
+/**
+ * Apaga TODOS os dados do usuário logado, tanto na nuvem (Supabase) quanto
+ * neste aparelho. Usado pelo botão "Limpar todos os dados" em Configurações.
+ * Sem isso, apagar só localmente não adianta: a próxima sincronização traria
+ * os dados de volta da nuvem.
+ */
+export async function limparDadosDoUsuarioAtual(): Promise<void> {
+  aplicandoRemoto = true;
+  try {
+    if (supabase && syncingUid) {
+      const { error } = await supabase.from(TABELA).delete().eq('user_id', syncingUid);
+      if (error) throw error;
+    }
+    CHAVES_SINCRONIZADAS.forEach((chave) => storage.remove(chave));
+  } finally {
+    aplicandoRemoto = false;
+  }
+}

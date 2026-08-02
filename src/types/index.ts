@@ -54,7 +54,7 @@ export const STATUS_CLIENTE_LABEL: Record<StatusCliente, string> = {
 export const STATUS_CLIENTE_COLOR: Record<StatusCliente, { bg: string; text: string; dot: string }> = {
   novo_lead: { bg: 'bg-blue-50', text: 'text-blue-600', dot: 'bg-blue-500' },
   em_contato: { bg: 'bg-amber-50', text: 'text-amber-600', dot: 'bg-amber-500' },
-  negociacao: { bg: 'bg-purple-50', text: 'text-purple-600', dot: 'bg-purple-500' },
+  negociacao: { bg: 'bg-teal-50', text: 'text-teal-600', dot: 'bg-teal-500' },
   proposta_enviada: { bg: 'bg-indigo-50', text: 'text-indigo-600', dot: 'bg-indigo-500' },
   fechado: { bg: 'bg-green-50', text: 'text-green-600', dot: 'bg-green-500' },
   perdido: { bg: 'bg-red-50', text: 'text-red-600', dot: 'bg-red-500' },

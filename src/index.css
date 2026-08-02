@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-zaz-purple: #5B2A86;
-  --color-zaz-purple-dark: #401D61;
-  --color-zaz-purple-light: #7C4DA8;
+  --color-zaz-purple: #D9622F;
+  --color-zaz-purple-dark: #B84D1F;
+  --color-zaz-purple-light: #F0955C;
 
   --color-brand-blue: #2F6FED;
   --color-brand-blue-dark: #1E4FBF;
@@ -144,5 +144,38 @@
   html.dark .text-gray-800,
   html.dark .text-gray-900 {
     color: var(--color-ink);
+  }
+
+  /* Cabeçalho: usa bg-white/90 (Tailwind opacity variant), que a rede de
+     segurança acima não alcança porque gera uma classe diferente de
+     .bg-white. Definimos a cor certa direto por seletor de tag. */
+  html.dark header.app-header {
+    background-color: rgba(23, 25, 35, 0.88);
+    border-color: #23262F;
+  }
+
+  /* ===================== Menu lateral no modo escuro ===================== */
+  /* Visual "flutuante": cartão arredondado com respiro nas bordas e um
+     degradê quente (em vez do roxo chapado do modo claro), inspirado em
+     painéis modernos de dashboard. */
+  html.dark .sidebar-shell {
+    margin: 12px 0 12px 12px;
+    height: calc(100vh - 24px);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(165deg, #2A1B2E 0%, #3B1F2B 32%, #4A2419 62%, #5C2E14 100%);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+  html.dark .sidebar-shell .sidebar-navlink-active {
+    background: linear-gradient(135deg, #E8823C, #D9622F);
+    color: #fff;
+    box-shadow: 0 4px 14px -4px rgba(217, 98, 47, 0.6);
+  }
+  html.dark .sidebar-shell .sidebar-navlink:hover:not(.sidebar-navlink-active) {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  html.dark .sidebar-shell .sidebar-footer-card {
+    background: rgba(0, 0, 0, 0.22);
+    border-color: rgba(255, 255, 255, 0.08);
   }
 }

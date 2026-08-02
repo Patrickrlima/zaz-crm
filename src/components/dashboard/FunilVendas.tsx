@@ -4,7 +4,7 @@ import { KANBAN_COLUNAS, STATUS_CLIENTE_LABEL, type Cliente } from '../../types'
 const CORES: Record<string, string> = {
   novo_lead: '#3B82F6',
   em_contato: '#F59E0B',
-  negociacao: '#7C4DA8',
+  negociacao: '#0D9488',
   proposta_enviada: '#6366F1',
   fechado: '#16A34A',
   perdido: '#9CA3AF',

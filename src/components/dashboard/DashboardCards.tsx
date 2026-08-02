@@ -49,7 +49,7 @@ export function DashboardCards({
     },
     {
       icon: Handshake,
-      iconBg: 'bg-purple-50',
+      iconBg: 'bg-orange-50',
       iconColor: 'text-zaz-purple',
       label: 'Negociações',
       value: negociacoes,

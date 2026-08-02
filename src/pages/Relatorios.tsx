@@ -27,7 +27,7 @@ import { formatCurrency } from '../utils/format';
 const CORES_STATUS: Record<string, string> = {
   novo_lead: '#3B82F6',
   em_contato: '#F59E0B',
-  negociacao: '#7C4DA8',
+  negociacao: '#0D9488',
   proposta_enviada: '#6366F1',
   fechado: '#16A34A',
   perdido: '#9CA3AF',
@@ -165,7 +165,7 @@ export default function Relatorios() {
               <XAxis dataKey="mes" tick={{ fontSize: 12 }} stroke="#8A8E9B" />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} stroke="#8A8E9B" />
               <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #EFF0F5', fontSize: 12 }} />
-              <Line type="monotone" dataKey="clientes" stroke="#5B2A86" strokeWidth={2.5} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="clientes" stroke="#D9622F" strokeWidth={2.5} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
