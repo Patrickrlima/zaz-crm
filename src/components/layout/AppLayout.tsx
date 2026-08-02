@@ -12,7 +12,7 @@ const TITLES: Record<string, { title: string; subtitle?: string }> = {
   '/clientes': { title: 'Clientes', subtitle: 'Gerencie sua carteira de clientes' },
   '/agenda': { title: 'Agenda', subtitle: 'Suas visitas, ligações e reuniões' },
   '/prospeccoes': { title: 'Prospecções', subtitle: 'Funil de vendas em formato Kanban' },
-  '/pos-venda': { title: 'Pós-venda', subtitle: 'Clientes fechados e desempenho de MCV/TPV' },
+  '/pos-venda': { title: 'Pós-venda', subtitle: 'Clique no ☰ para ver a lista de clientes individualmente' },
   '/propostas': { title: 'Propostas', subtitle: 'Acompanhe as propostas enviadas' },
   '/simulador': { title: 'Simulador', subtitle: 'Calcule taxas e valores líquidos' },
   '/historico': { title: 'Histórico', subtitle: 'Linha do tempo de atividades' },
@@ -62,6 +62,14 @@ export function AppLayout() {
 
   const { title, subtitle } = tituloParaRota(location.pathname);
 
+  function handleMenuClick() {
+    if (location.pathname === '/pos-venda' && window.innerWidth >= 1024) {
+      window.dispatchEvent(new Event('zaz-abrir-lista-pos-venda'));
+    } else {
+      setSidebarOpen((v) => !v);
+    }
+  }
+
   return (
     <div className="flex min-h-screen bg-surface-muted">
       <Sidebar
@@ -77,7 +85,7 @@ export function AppLayout() {
           subtitle={subtitle}
           usuario={usuario}
           notificationCount={retornosHoje}
-          onMenuClick={() => setSidebarOpen((v) => !v)}
+          onMenuClick={handleMenuClick}
         />
 
         <main className="flex-1 px-4 py-5 sm:px-6 sm:py-6">

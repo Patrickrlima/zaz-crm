@@ -32,6 +32,20 @@ function ultimosMeses(qtd: number): { chave: string; label: string }[] {
   return meses;
 }
 
+/** TPV atual de um cliente: usa o valor cadastrado/importado; se não tiver, soma as propostas aceitas (compatibilidade). */
+function tpvDoCliente(cliente: Cliente, propostas: Proposta[]): number {
+  if (cliente.tpvAtual !== undefined) return cliente.tpvAtual;
+  return propostas.filter((p) => p.clienteId === cliente.id && p.status === 'aceita').reduce((acc, p) => acc + p.valor, 0);
+}
+
+/** Projeta o TPV do mês inteiro com base no ritmo até hoje: (TPV atual ÷ dia do mês) × dias no mês. */
+function projetarTpv(tpvAtual: number, dataReferencia: Date = new Date()): number {
+  if (tpvAtual <= 0) return 0;
+  const dia = dataReferencia.getDate();
+  const diasNoMes = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth() + 1, 0).getDate();
+  return (tpvAtual / dia) * diasNoMes;
+}
+
 function CardMetrica({
   icone,
   label,
@@ -69,41 +83,36 @@ export function DashboardAnalitico({ clientes, propostas, historico }: Dashboard
     [clientes]
   );
 
-  const tpvAtual = useMemo(
-    () => propostas.filter((p) => p.status === 'aceita').reduce((acc, p) => acc + p.valor, 0),
-    [propostas]
-  );
+  const tpvAtual = useMemo(() => clientes.reduce((acc, c) => acc + tpvDoCliente(c, propostas), 0), [clientes, propostas]);
 
-  // "Projetado" = o que seria transacionado se todos os clientes cumprissem o MCV combinado.
-  const tpvProjetado = mcvComprometidoTotal;
+  // "Projetado" = ritmo atual extrapolado pro mês inteiro (TPV atual ÷ dia do mês × dias no mês).
+  const tpvProjetado = useMemo(() => projetarTpv(tpvAtual), [tpvAtual]);
 
-  const performance = tpvProjetado > 0 ? Math.min(100, (tpvAtual / tpvProjetado) * 100) : 0;
+  const performance = mcvComprometidoTotal > 0 ? Math.min(100, (tpvAtual / mcvComprometidoTotal) * 100) : 0;
 
   const evolucao = useMemo(() => {
     const meses = ultimosMeses(6);
     let acumuladoAtual = 0;
-    let acumuladoProjetado = 0;
-    return meses.map(({ chave, label }) => {
+    return meses.map(({ chave, label }, idx) => {
       const [ano, mes] = chave.split('-').map(Number);
       const doMes = propostas.filter((p) => {
         const d = new Date(p.data);
         return d.getFullYear() === ano && d.getMonth() === mes && p.status === 'aceita';
       });
       acumuladoAtual += doMes.reduce((acc, p) => acc + p.valor, 0);
-      acumuladoProjetado += tpvProjetado / 6;
-      return { mes: label, atual: Math.round(acumuladoAtual), projetado: Math.round(acumuladoProjetado) };
+      const ehMesAtual = idx === meses.length - 1;
+      const valorAtualMes = ehMesAtual ? tpvAtual : acumuladoAtual;
+      return { mes: label, atual: Math.round(valorAtualMes), projetado: Math.round(ehMesAtual ? tpvProjetado : valorAtualMes) };
     });
-  }, [propostas, tpvProjetado]);
+  }, [propostas, tpvAtual, tpvProjetado]);
 
   const ranking = useMemo(() => {
     return clientes
       .map((c) => {
         const mcv = c.mcvComprometido ?? 0;
-        const tpvAtualCliente = propostas
-          .filter((p) => p.clienteId === c.id && p.status === 'aceita')
-          .reduce((acc, p) => acc + p.valor, 0);
+        const tpvAtualCliente = tpvDoCliente(c, propostas);
         const percentual = mcv > 0 ? (tpvAtualCliente / mcv) * 100 : 0;
-        return { cliente: c, mcv, tpvAtual: tpvAtualCliente, percentual };
+        return { cliente: c, mcv, tpvAtual: tpvAtualCliente, tpvProjetado: projetarTpv(tpvAtualCliente), percentual };
       })
       .filter((r) => r.mcv > 0)
       .sort((a, b) => b.mcv - a.mcv);
@@ -141,7 +150,7 @@ export function DashboardAnalitico({ clientes, propostas, historico }: Dashboard
         />
         <CardMetrica
           icone={<TrendingUp size={20} className="text-zaz-purple" />}
-          corIcone="bg-orange-50"
+          corIcone="bg-accent-soft"
           label="TPV atual"
           valor={formatCurrency(tpvAtual)}
         />

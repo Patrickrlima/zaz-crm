@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, Bell, ChevronDown, LogOut, UserCircle } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, Bell, ChevronDown, LogOut, UserCircle, ArrowLeft } from 'lucide-react';
 import { initials } from '../../utils/format';
 import { authService } from '../../services/authService';
 import type { Usuario } from '../../types';
@@ -15,6 +15,8 @@ interface HeaderProps {
 
 export function Header({ title, subtitle, usuario, notificationCount = 0, onMenuClick }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
   const dataAtual = new Date().toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: 'long',
@@ -31,6 +33,16 @@ export function Header({ title, subtitle, usuario, notificationCount = 0, onMenu
         >
           <Menu size={20} />
         </button>
+        {location.pathname !== '/' && (
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-lg p-2 text-ink-soft hover:bg-surface-alt"
+            aria-label="Voltar"
+            title="Voltar"
+          >
+            <ArrowLeft size={20} />
+          </button>
+        )}
         <div className="min-w-0">
           <h1 className="truncate text-xl font-semibold text-ink sm:text-2xl">{title}</h1>
           {subtitle && <p className="truncate text-sm text-ink-soft">{subtitle}</p>}

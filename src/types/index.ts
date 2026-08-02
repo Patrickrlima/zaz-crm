@@ -36,6 +36,8 @@ export interface Cliente {
   observacoes: string;
   faturamentoEstimado?: number;
   mcvComprometido?: number;
+  /** Valor já transacionado na maquininha neste mês. Editável diretamente (ou preenchido por importação). */
+  tpvAtual?: number;
   ticketMedio?: number;
   situacaoCadastral?: string;
   cnaePrincipal?: string;
