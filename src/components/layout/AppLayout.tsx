@@ -79,7 +79,7 @@ export function AppLayout() {
         onToggleCollapse={alternarColapso}
       />
 
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <Header
           title={title}
           subtitle={subtitle}
@@ -88,7 +88,7 @@ export function AppLayout() {
           onMenuClick={handleMenuClick}
         />
 
-        <main className="flex-1 px-4 py-5 sm:px-6 sm:py-6">
+        <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
