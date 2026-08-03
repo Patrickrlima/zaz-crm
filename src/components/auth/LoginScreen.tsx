@@ -94,7 +94,7 @@ export function LoginScreen() {
                 transition={{ duration: 0.18 }}
                 className="w-full"
               >
-                <FormularioLogin aoEsquecerSenha={() => setTela('recuperar')} />
+                <FormularioLogin />
               </motion.div>
             ) : (
               <motion.div
@@ -115,7 +115,7 @@ export function LoginScreen() {
   );
 }
 
-function FormularioLogin({ aoEsquecerSenha }: { aoEsquecerSenha: () => void }) {
+function FormularioLogin() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -177,14 +177,6 @@ function FormularioLogin({ aoEsquecerSenha }: { aoEsquecerSenha: () => void }) {
           </button>
         </div>
       </div>
-
-      <button
-        type="button"
-        onClick={aoEsquecerSenha}
-        className="mt-3 text-xs font-medium text-zaz-purple hover:underline"
-      >
-        Esqueceu a senha?
-      </button>
 
       {erro && <p className="mt-3 text-xs text-brand-red">{erro}</p>}
 
