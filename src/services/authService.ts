@@ -47,7 +47,10 @@ export const authService = {
     return () => subscription.subscription.unsubscribe();
   },
 
-  usuarioAtual(): User | null {
-    return null;
+  /** E-mail da conta com a qual o usuário fez login (fonte confiável, direto do Supabase Auth). */
+  async emailLogado(): Promise<string | null> {
+    if (!supabase) return null;
+    const { data } = await supabase.auth.getUser();
+    return data.user?.email ?? null;
   },
 };

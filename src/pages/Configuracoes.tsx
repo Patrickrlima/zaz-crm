@@ -18,6 +18,21 @@ export default function Configuracoes() {
   const [carregandoFoto, setCarregandoFoto] = useState(false);
   const inputFotoRef = useRef<HTMLInputElement>(null);
 
+  // O e-mail exibido é sempre o da conta logada de verdade (Supabase Auth),
+  // não um valor solto editável — evita mostrar um e-mail desatualizado ou errado.
+  useEffect(() => {
+    authService.emailLogado().then((emailReal) => {
+      if (emailReal) {
+        setUsuario((atual) => {
+          if (atual.email === emailReal) return atual;
+          const atualizado = { ...atual, email: emailReal };
+          usuarioService.salvar(atualizado);
+          return atualizado;
+        });
+      }
+    });
+  }, []);
+
   async function handleSelecionarFoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -163,13 +178,14 @@ export default function Configuracoes() {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1.5 block text-sm font-medium text-ink">E-mail</label>
+            <label className="mb-1.5 block text-sm font-medium text-ink">E-mail de login</label>
             <input
               type="email"
-              className="input-base"
+              disabled
+              className="input-base cursor-not-allowed bg-surface-alt text-ink-soft"
               value={usuario.email}
-              onChange={(e) => setUsuario({ ...usuario, email: e.target.value })}
             />
+            <p className="mt-1 text-xs text-ink-faint">Este é o e-mail da sua conta — não pode ser alterado aqui.</p>
           </div>
         </div>
         <button onClick={handleSalvarUsuario} className="btn-primary mt-4">

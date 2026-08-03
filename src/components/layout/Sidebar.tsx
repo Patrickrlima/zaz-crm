@@ -18,9 +18,9 @@ import {
   Handshake,
   Search,
   LogOut,
+  UserRound,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import zazLogo from '../../assets/zaz-logo.jpg';
 import { authService } from '../../services/authService';
 import { usuarioService } from '../../services/usuarioService';
 import { agendaService } from '../../services/agendaService';
@@ -28,6 +28,7 @@ import { propostaService } from '../../services/propostaService';
 import { clienteService } from '../../services/clienteService';
 import { STORAGE_KEYS } from '../../services/storage';
 import { CLOUD_SYNC_EVENT } from '../../services/cloudSync';
+import { initials } from '../../utils/format';
 
 const URL_SIMULADOR_EXTERNO = 'https://patrickrlima.github.io/Simulador-Vero/';
 
@@ -137,9 +138,11 @@ export function Sidebar({ open, onClose, collapsed, onToggleCollapse }: SidebarP
         <div className={`flex flex-col items-center gap-2 px-4 pb-4 pt-6 text-center ${collapsed ? 'px-2' : ''}`}>
           <div className="relative">
             {usuario.fotoUrl ? (
-              <img src={usuario.fotoUrl} alt={usuario.nome} className="h-14 w-14 rounded-full object-cover ring-2 ring-white/15" />
+              <img src={usuario.fotoUrl} alt={usuario.nome} className="h-20 w-20 rounded-full object-cover ring-2 ring-white/15" />
             ) : (
-              <img src={zazLogo} alt="ZAZ Vendas" className="h-14 w-14 rounded-full object-cover ring-2 ring-white/15" />
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/10 text-lg font-semibold text-white ring-2 ring-white/15">
+                {initials(usuario.nome) || <UserRound size={26} className="text-white/50" />}
+              </div>
             )}
             <span
               className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-sidebar ${

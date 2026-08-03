@@ -8,7 +8,6 @@ import { usuarioService } from '../../services/usuarioService';
 import { agendaService } from '../../services/agendaService';
 
 const TITLES: Record<string, { title: string; subtitle?: string }> = {
-  '/': { title: 'Dashboard', subtitle: 'Bem-vindo de volta! 👋' },
   '/clientes': { title: 'Clientes', subtitle: 'Gerencie sua carteira de clientes' },
   '/agenda': { title: 'Agenda', subtitle: 'Suas visitas, ligações e reuniões' },
   '/prospeccoes': { title: 'Prospecções', subtitle: 'Funil de vendas em formato Kanban' },
@@ -22,7 +21,18 @@ const TITLES: Record<string, { title: string; subtitle?: string }> = {
 
 const SIDEBAR_COLAPSADO_KEY = 'zaz_crm_sidebar_colapsado';
 
-function tituloParaRota(pathname: string): { title: string; subtitle?: string } {
+function saudacaoPorHorario(): string {
+  const hora = new Date().getHours();
+  if (hora < 12) return 'Bom dia';
+  if (hora < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
+function tituloParaRota(pathname: string, primeiroNome?: string): { title: string; subtitle?: string } {
+  if (pathname === '/') {
+    const saudacao = primeiroNome ? `${saudacaoPorHorario()}, ${primeiroNome}!` : `${saudacaoPorHorario()}!`;
+    return { title: 'Dashboard', subtitle: `${saudacao} Bem-vindo(a) de volta 👋` };
+  }
   if (TITLES[pathname]) return TITLES[pathname];
   if (pathname.startsWith('/clientes/')) return { title: 'Detalhes do cliente' };
   return { title: 'Central do Vendedor' };
@@ -60,7 +70,8 @@ export function AppLayout() {
     });
   }
 
-  const { title, subtitle } = tituloParaRota(location.pathname);
+  const primeiroNome = usuario.nome.trim().split(' ')[0] || undefined;
+  const { title, subtitle } = tituloParaRota(location.pathname, primeiroNome);
 
   function handleMenuClick() {
     if (window.innerWidth >= 1024 && location.pathname === '/pos-venda') {
