@@ -1,15 +1,19 @@
-import { useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
-import { Plus, Users, Upload } from 'lucide-react';
+import { Plus, Users, Upload, LayoutGrid, List, MessageCircle, Phone } from 'lucide-react';
 import { ClienteCard } from '../components/clientes/ClienteCard';
 import { ClienteFiltro } from '../components/clientes/ClienteFiltro';
 import { ClienteForm, type ClienteFormValues } from '../components/clientes/ClienteForm';
 import { ImportarClientesModal } from '../components/clientes/ImportarClientesModal';
 import { Modal } from '../components/ui/Modal';
 import { EmptyState } from '../components/ui/EmptyState';
+import { ClienteStatusBadge } from '../components/ui/StatusBadge';
 import { clienteService } from '../services/clienteService';
+import { initials, nomeExibicaoCliente, linkWhatsApp } from '../utils/format';
 import type { Cliente, StatusCliente } from '../types';
+
+const VISUALIZACAO_KEY = 'zaz_crm_clientes_visualizacao';
 
 export default function Clientes() {
   const [searchParams] = useSearchParams();
@@ -18,12 +22,28 @@ export default function Clientes() {
   const [status, setStatus] = useState<StatusCliente | 'todos'>('todos');
   const [modalAberto, setModalAberto] = useState(false);
   const [modalImportar, setModalImportar] = useState(false);
+  const [visualizacao, setVisualizacao] = useState<'grade' | 'lista'>(
+    () => (window.localStorage.getItem(VISUALIZACAO_KEY) as 'grade' | 'lista') || 'grade'
+  );
 
   function carregar() {
     setClientes(clienteService.listar());
   }
 
   useCloudSyncRefresh(carregar);
+
+  // Botão ☰ no topo (sem função nesta tela até então) alterna entre grade e lista.
+  useEffect(() => {
+    function handler() {
+      setVisualizacao((v) => {
+        const novo = v === 'grade' ? 'lista' : 'grade';
+        window.localStorage.setItem(VISUALIZACAO_KEY, novo);
+        return novo;
+      });
+    }
+    window.addEventListener('zaz-alternar-visualizacao-clientes', handler);
+    return () => window.removeEventListener('zaz-alternar-visualizacao-clientes', handler);
+  }, []);
 
   const filtrados = useMemo(() => {
     return clientes.filter((c) => {
@@ -48,7 +68,25 @@ export default function Clientes() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <ClienteFiltro busca={busca} onBuscaChange={setBusca} status={status} onStatusChange={setStatus} />
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="hidden items-center gap-1 rounded-lg border border-gray-200 p-0.5 sm:flex">
+            <button
+              onClick={() => setVisualizacao('grade')}
+              className={`rounded-md p-1.5 ${visualizacao === 'grade' ? 'bg-accent-soft text-zaz-purple' : 'text-ink-faint hover:text-ink-soft'}`}
+              title="Ver em grade"
+              aria-label="Ver em grade"
+            >
+              <LayoutGrid size={15} />
+            </button>
+            <button
+              onClick={() => setVisualizacao('lista')}
+              className={`rounded-md p-1.5 ${visualizacao === 'lista' ? 'bg-accent-soft text-zaz-purple' : 'text-ink-faint hover:text-ink-soft'}`}
+              title="Ver em lista"
+              aria-label="Ver em lista"
+            >
+              <List size={15} />
+            </button>
+          </div>
           <button onClick={() => setModalImportar(true)} className="btn-secondary">
             <Upload size={16} /> Importar
           </button>
@@ -75,11 +113,48 @@ export default function Clientes() {
             ) : undefined
           }
         />
-      ) : (
+      ) : visualizacao === 'grade' ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtrados.map((cliente) => (
             <ClienteCard key={cliente.id} cliente={cliente} />
           ))}
+        </div>
+      ) : (
+        <div className="card divide-y divide-gray-100 overflow-hidden">
+          {filtrados.map((cliente) => {
+            const whatsapp = linkWhatsApp(cliente.whatsapp || cliente.telefone);
+            return (
+              <div key={cliente.id} className="flex items-center gap-3 px-4 py-3 hover:bg-surface-alt">
+                <Link to={`/clientes/${cliente.id}`} className="flex min-w-0 flex-1 items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft text-xs font-semibold text-zaz-purple">
+                    {initials(nomeExibicaoCliente(cliente)) || '—'}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-ink">{nomeExibicaoCliente(cliente)}</p>
+                    <p className="truncate text-xs text-ink-faint">
+                      {cliente.cidade}{cliente.cidade && cliente.estado ? ' - ' : ''}{cliente.estado} {cliente.segmento && `· ${cliente.segmento}`}
+                    </p>
+                  </div>
+                  <span className="hidden shrink-0 items-center gap-1 text-xs text-ink-soft sm:flex">
+                    <Phone size={12} className="text-ink-faint" /> {cliente.telefone || '—'}
+                  </span>
+                  <ClienteStatusBadge status={cliente.status} />
+                </Link>
+                {whatsapp && (
+                  <a
+                    href={whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 rounded-lg p-1.5 text-brand-green hover:bg-green-50"
+                    title="Chamar no WhatsApp"
+                    aria-label="Chamar no WhatsApp"
+                  >
+                    <MessageCircle size={15} />
+                  </a>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 

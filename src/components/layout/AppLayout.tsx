@@ -63,8 +63,10 @@ export function AppLayout() {
   const { title, subtitle } = tituloParaRota(location.pathname);
 
   function handleMenuClick() {
-    if (location.pathname === '/pos-venda' && window.innerWidth >= 1024) {
+    if (window.innerWidth >= 1024 && location.pathname === '/pos-venda') {
       window.dispatchEvent(new Event('zaz-abrir-lista-pos-venda'));
+    } else if (window.innerWidth >= 1024 && location.pathname === '/clientes') {
+      window.dispatchEvent(new Event('zaz-alternar-visualizacao-clientes'));
     } else {
       setSidebarOpen((v) => !v);
     }
