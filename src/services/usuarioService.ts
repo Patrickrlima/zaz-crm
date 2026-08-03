@@ -3,9 +3,9 @@ import type { Usuario, Configuracoes } from '../types';
 
 const USUARIO_PADRAO: Usuario = {
   id: 'user_1',
-  nome: 'Patrick Lima',
+  nome: '',
   cargo: 'Vendedor',
-  email: 'patrick.lima@zazvendas.com.br',
+  email: '',
 };
 
 export const usuarioService = {

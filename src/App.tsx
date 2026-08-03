@@ -16,13 +16,17 @@ import Configuracoes from './pages/Configuracoes';
 import { seedIfEmpty } from './services/seedService';
 import { authService } from './services/authService';
 import { iniciarSincronizacao, pararSincronizacao } from './services/cloudSync';
+import { usuarioService } from './services/usuarioService';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { NovaSenhaScreen } from './components/auth/NovaSenhaScreen';
+import { PrimeiroAcessoModal } from './components/auth/PrimeiroAcessoModal';
 import { Loader2 } from 'lucide-react';
 
 export default function App() {
   const [usuario, setUsuario] = useState<User | null | undefined>(undefined);
   const [modoRecuperacaoSenha, setModoRecuperacaoSenha] = useState(false);
+  const [precisaPrimeiroAcesso, setPrecisaPrimeiroAcesso] = useState(false);
+  const [carregandoPerfil, setCarregandoPerfil] = useState(false);
 
   useEffect(() => {
     // Sem Supabase configurado: segue funcionando 100% local (sem tela de login).
@@ -39,7 +43,7 @@ export default function App() {
         return;
       }
       if (user) {
-        iniciarSincronizacao(user.id);
+        verificarPerfil(user);
       } else {
         pararSincronizacao();
       }
@@ -47,8 +51,27 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  // Ainda verificando se há sessão ativa.
-  if (usuario === undefined) {
+  async function verificarPerfil(user: User) {
+    setCarregandoPerfil(true);
+    try {
+      await iniciarSincronizacao(user.id);
+      const perfil = usuarioService.obter();
+      // Perfil vazio (conta nova, nunca preenchida): pede nome/telefone antes de liberar o app.
+      if (!perfil.nome.trim()) {
+        if (!perfil.email && user.email) {
+          usuarioService.salvar({ ...perfil, email: user.email });
+        }
+        setPrecisaPrimeiroAcesso(true);
+      } else {
+        setPrecisaPrimeiroAcesso(false);
+      }
+    } finally {
+      setCarregandoPerfil(false);
+    }
+  }
+
+  // Ainda verificando se há sessão ativa, ou carregando os dados da nuvem pela primeira vez.
+  if (usuario === undefined || carregandoPerfil) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface-muted">
         <Loader2 className="animate-spin text-zaz-purple" size={28} />
@@ -74,22 +97,27 @@ export default function App() {
   }
 
   return (
-    <HashRouter>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/clientes" element={<Clientes />} />
-          <Route path="/clientes/:id" element={<ClienteDetalhes />} />
-          <Route path="/agenda" element={<Agenda />} />
-          <Route path="/prospeccoes" element={<Prospeccoes />} />
-          <Route path="/pos-venda" element={<PosVenda />} />
-          <Route path="/propostas" element={<Propostas />} />
-          <Route path="/simulador" element={<Simulador />} />
-          <Route path="/historico" element={<Historico />} />
-          <Route path="/relatorios" element={<Relatorios />} />
-          <Route path="/configuracoes" element={<Configuracoes />} />
-        </Route>
-      </Routes>
-    </HashRouter>
+    <>
+      {precisaPrimeiroAcesso && (
+        <PrimeiroAcessoModal usuario={usuarioService.obter()} onConcluido={() => setPrecisaPrimeiroAcesso(false)} />
+      )}
+      <HashRouter>
+        <Routes>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/clientes" element={<Clientes />} />
+            <Route path="/clientes/:id" element={<ClienteDetalhes />} />
+            <Route path="/agenda" element={<Agenda />} />
+            <Route path="/prospeccoes" element={<Prospeccoes />} />
+            <Route path="/pos-venda" element={<PosVenda />} />
+            <Route path="/propostas" element={<Propostas />} />
+            <Route path="/simulador" element={<Simulador />} />
+            <Route path="/historico" element={<Historico />} />
+            <Route path="/relatorios" element={<Relatorios />} />
+            <Route path="/configuracoes" element={<Configuracoes />} />
+          </Route>
+        </Routes>
+      </HashRouter>
+    </>
   );
 }

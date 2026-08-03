@@ -152,6 +152,16 @@ export default function Configuracoes() {
               onChange={(e) => setUsuario({ ...usuario, cargo: e.target.value })}
             />
           </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-ink">Telefone</label>
+            <input
+              type="tel"
+              className="input-base"
+              value={usuario.telefone ?? ''}
+              onChange={(e) => setUsuario({ ...usuario, telefone: e.target.value })}
+              placeholder="(00) 00000-0000"
+            />
+          </div>
           <div className="sm:col-span-2">
             <label className="mb-1.5 block text-sm font-medium text-ink">E-mail</label>
             <input
