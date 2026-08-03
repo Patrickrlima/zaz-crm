@@ -1,5 +1,8 @@
 import { clienteService } from './clienteService';
-import type { Cliente, StatusCliente } from '../types';
+import { storage, STORAGE_KEYS } from './storage';
+import { generateId } from '../utils/id';
+import { nomeExibicaoCliente } from '../utils/format';
+import type { Cliente, RegistroHistorico, StatusCliente } from '../types';
 
 export type ModoImportacao = 'padrao' | 'pos_venda';
 
@@ -178,14 +181,21 @@ export function mapearLinhas(linhas: Record<string, string>[], modo: ModoImporta
   });
 }
 
-/** Executa a importação de fato: cria clientes novos e atualiza os que já existem (casados por CNPJ). */
+/**
+ * Executa a importação de fato: cria clientes novos e atualiza os que já
+ * existem (casados por CNPJ) — tudo numa ÚNICA gravação no fim, em vez de
+ * uma gravação por linha. Isso evita que, ao importar muitos clientes de
+ * uma vez, envios simultâneos para a nuvem cheguem fora de ordem e um
+ * "sobrescreva" o outro, fazendo alguns clientes sumirem.
+ */
 export function executarImportacao(linhasImportadas: LinhaImportada[]): ResultadoImportacao {
-  const existentes = clienteService.listar();
-  const porCnpj = new Map(existentes.filter((c) => c.cnpj).map((c) => [c.cnpj.replace(/\D/g, ''), c]));
+  const lista = clienteService.listar();
+  const porCnpj = new Map(lista.filter((c) => c.cnpj).map((c) => [c.cnpj.replace(/\D/g, ''), c]));
 
   let criados = 0;
   let atualizados = 0;
   let ignorados = 0;
+  const novosRegistrosHistorico: { titulo: string; descricao: string; clienteNome: string; clienteId: string }[] = [];
 
   for (const item of linhasImportadas) {
     if (item.acao === 'ignorar') {
@@ -193,17 +203,26 @@ export function executarImportacao(linhasImportadas: LinhaImportada[]): Resultad
       continue;
     }
 
-    if (item.acao === 'atualizar') {
-      const cnpjLimpo = (item.dados.cnpj ?? '').replace(/\D/g, '');
-      const existente = porCnpj.get(cnpjLimpo);
-      if (existente) {
-        clienteService.atualizar(existente.id, item.dados);
+    const cnpjLimpo = (item.dados.cnpj ?? '').replace(/\D/g, '');
+    const existente = item.acao === 'atualizar' ? porCnpj.get(cnpjLimpo) : undefined;
+
+    if (existente) {
+      const idx = lista.findIndex((c) => c.id === existente.id);
+      if (idx !== -1) {
+        lista[idx] = { ...lista[idx], ...item.dados };
         atualizados++;
-        continue;
+        novosRegistrosHistorico.push({
+          titulo: 'Edição de cliente',
+          descricao: `Dados de ${nomeExibicaoCliente(lista[idx])} foram atualizados via importação.`,
+          clienteId: lista[idx].id,
+          clienteNome: nomeExibicaoCliente(lista[idx]),
+        });
       }
+      continue;
     }
 
-    clienteService.criar({
+    const novoCliente: Cliente = {
+      id: generateId('cli'),
       nomeFantasia: item.dados.nomeFantasia ?? '',
       razaoSocial: item.dados.razaoSocial ?? '',
       cnpj: item.dados.cnpj ?? '',
@@ -220,8 +239,32 @@ export function executarImportacao(linhasImportadas: LinhaImportada[]): Resultad
       mcvComprometido: item.dados.mcvComprometido,
       tpvAtual: item.dados.tpvAtual,
       posVenda: item.dados.posVenda,
-    });
+      dataCadastro: new Date().toISOString(),
+    };
+    lista.unshift(novoCliente);
+    if (cnpjLimpo) porCnpj.set(cnpjLimpo, novoCliente);
     criados++;
+    novosRegistrosHistorico.push({
+      titulo: 'Cadastro de cliente',
+      descricao: `${nomeExibicaoCliente(novoCliente)} foi adicionado via importação de planilha.`,
+      clienteId: novoCliente.id,
+      clienteNome: nomeExibicaoCliente(novoCliente),
+    });
+  }
+
+  // Uma única gravação para todos os clientes...
+  storage.save(STORAGE_KEYS.clientes, lista);
+
+  // ...e uma única gravação para todo o histórico da importação.
+  if (novosRegistrosHistorico.length > 0) {
+    const historicoAtual = storage.list<RegistroHistorico>(STORAGE_KEYS.historico);
+    const novosRegistros: RegistroHistorico[] = novosRegistrosHistorico.map((r) => ({
+      id: generateId('hist'),
+      tipo: 'cadastro',
+      data: new Date().toISOString(),
+      ...r,
+    }));
+    storage.save(STORAGE_KEYS.historico, [...novosRegistros, ...historicoAtual]);
   }
 
   return { criados, atualizados, ignorados };
