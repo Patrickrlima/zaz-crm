@@ -1,5 +1,4 @@
 import { clienteService } from './clienteService';
-import { propostaService } from './propostaService';
 import type { Cliente, StatusCliente } from '../types';
 
 export type ModoImportacao = 'padrao' | 'pos_venda';
@@ -7,7 +6,6 @@ export type ModoImportacao = 'padrao' | 'pos_venda';
 export interface LinhaImportada {
   linha: number;
   dados: Partial<Cliente>;
-  tpvAtual?: number;
   erro?: string;
   acao: 'criar' | 'atualizar' | 'ignorar';
 }
@@ -79,6 +77,7 @@ function normalizarStatus(valor: string): StatusCliente | undefined {
     negociando: 'negociacao',
     proposta: 'proposta_enviada',
     ganho: 'fechado',
+    ativo: 'fechado',
     perdido: 'perdido',
   };
   return mapa[v];
@@ -86,7 +85,27 @@ function normalizarStatus(valor: string): StatusCliente | undefined {
 
 function paraNumero(valor: string | undefined): number | undefined {
   if (!valor) return undefined;
-  const limpo = String(valor).replace(/[^\d,.-]/g, '').replace(/\.(?=\d{3},)/g, '').replace(',', '.');
+  let limpo = String(valor).replace(/[^\d,.-]/g, '').trim();
+  if (!limpo) return undefined;
+
+  const temVirgula = limpo.includes(',');
+  const temPonto = limpo.includes('.');
+
+  if (temVirgula && temPonto) {
+    // Os dois aparecem: o último símbolo é o separador decimal de verdade.
+    if (limpo.lastIndexOf(',') > limpo.lastIndexOf('.')) {
+      // 1.234,56 (formato BR/europeu) -> remove pontos de milhar, vírgula vira ponto
+      limpo = limpo.replace(/\./g, '').replace(',', '.');
+    } else {
+      // 1,234.56 (formato EUA) -> remove vírgulas de milhar
+      limpo = limpo.replace(/,/g, '');
+    }
+  } else if (temVirgula) {
+    // Só vírgula: trata como separador decimal (ex.: 174,33)
+    limpo = limpo.replace(',', '.');
+  }
+  // Só ponto (ou nenhum separador): já está em formato válido para parseFloat.
+
   const n = parseFloat(limpo);
   return Number.isFinite(n) ? n : undefined;
 }
@@ -144,6 +163,7 @@ export function mapearLinhas(linhas: Record<string, string>[], modo: ModoImporta
       observacoes: pegar('observacoes'),
       status: (statusBruto && normalizarStatus(statusBruto)) || (modo === 'pos_venda' ? 'fechado' : 'novo_lead'),
       mcvComprometido: paraNumero(pegar('mcvComprometido')),
+      tpvAtual,
       posVenda: modo === 'pos_venda' || undefined,
     };
 
@@ -154,16 +174,11 @@ export function mapearLinhas(linhas: Record<string, string>[], modo: ModoImporta
     const cnpjLimpo = cnpj.replace(/\D/g, '');
     const jaExiste = cnpjLimpo && porCnpj.has(cnpjLimpo);
 
-    return { linha: i + 2, dados, tpvAtual, acao: jaExiste ? 'atualizar' : 'criar' };
+    return { linha: i + 2, dados, acao: jaExiste ? 'atualizar' : 'criar' };
   });
 }
 
-/**
- * Executa a importação de fato: cria clientes novos e atualiza os que já
- * existem (casados por CNPJ). Quando a linha traz "TPV Atual", cria também
- * uma proposta "aceita" nesse valor — assim o Dashboard Analítico (que soma
- * propostas aceitas) já contabiliza o valor sem precisar de um campo extra.
- */
+/** Executa a importação de fato: cria clientes novos e atualiza os que já existem (casados por CNPJ). */
 export function executarImportacao(linhasImportadas: LinhaImportada[]): ResultadoImportacao {
   const existentes = clienteService.listar();
   const porCnpj = new Map(existentes.filter((c) => c.cnpj).map((c) => [c.cnpj.replace(/\D/g, ''), c]));
@@ -178,53 +193,35 @@ export function executarImportacao(linhasImportadas: LinhaImportada[]): Resultad
       continue;
     }
 
-    let clienteId: string | null = null;
-    let clienteNome = item.dados.nomeFantasia || item.dados.razaoSocial || '';
-
     if (item.acao === 'atualizar') {
       const cnpjLimpo = (item.dados.cnpj ?? '').replace(/\D/g, '');
       const existente = porCnpj.get(cnpjLimpo);
       if (existente) {
-        const atualizado = clienteService.atualizar(existente.id, item.dados);
-        clienteId = existente.id;
-        clienteNome = atualizado?.nomeFantasia || clienteNome;
+        clienteService.atualizar(existente.id, item.dados);
         atualizados++;
+        continue;
       }
     }
 
-    if (!clienteId) {
-      const criado = clienteService.criar({
-        nomeFantasia: item.dados.nomeFantasia ?? '',
-        razaoSocial: item.dados.razaoSocial ?? '',
-        cnpj: item.dados.cnpj ?? '',
-        telefone: item.dados.telefone ?? '',
-        whatsapp: item.dados.whatsapp ?? '',
-        email: item.dados.email ?? '',
-        cidade: item.dados.cidade ?? '',
-        estado: item.dados.estado ?? '',
-        endereco: item.dados.endereco ?? '',
-        segmento: item.dados.segmento ?? '',
-        status: item.dados.status ?? 'novo_lead',
-        responsavel: item.dados.responsavel ?? '',
-        observacoes: item.dados.observacoes ?? '',
-        mcvComprometido: item.dados.mcvComprometido,
-        posVenda: item.dados.posVenda,
-      });
-      clienteId = criado.id;
-      clienteNome = criado.nomeFantasia;
-      criados++;
-    }
-
-    if (item.tpvAtual && item.tpvAtual > 0 && clienteId) {
-      propostaService.criar({
-        clienteId,
-        clienteNome,
-        valor: item.tpvAtual,
-        parcelamento: 1,
-        taxas: { debito: 0, credito: 0, pix: 0, voucher: 0, banricompras: 0, antecipacao: 0, personalizada: 0 },
-        status: 'aceita',
-      });
-    }
+    clienteService.criar({
+      nomeFantasia: item.dados.nomeFantasia ?? '',
+      razaoSocial: item.dados.razaoSocial ?? '',
+      cnpj: item.dados.cnpj ?? '',
+      telefone: item.dados.telefone ?? '',
+      whatsapp: item.dados.whatsapp ?? '',
+      email: item.dados.email ?? '',
+      cidade: item.dados.cidade ?? '',
+      estado: item.dados.estado ?? '',
+      endereco: item.dados.endereco ?? '',
+      segmento: item.dados.segmento ?? '',
+      status: item.dados.status ?? 'novo_lead',
+      responsavel: item.dados.responsavel ?? '',
+      observacoes: item.dados.observacoes ?? '',
+      mcvComprometido: item.dados.mcvComprometido,
+      tpvAtual: item.dados.tpvAtual,
+      posVenda: item.dados.posVenda,
+    });
+    criados++;
   }
 
   return { criados, atualizados, ignorados };
