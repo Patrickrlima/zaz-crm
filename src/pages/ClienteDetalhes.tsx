@@ -13,6 +13,7 @@ import {
   PhoneCall,
   ArrowLeft,
   ExternalLink,
+  MessageCircle,
 } from 'lucide-react';
 import { clienteService } from '../services/clienteService';
 import { agendaService } from '../services/agendaService';
@@ -28,7 +29,7 @@ import { EventoForm, type EventoFormValues } from '../components/agenda/EventoFo
 import { Modal } from '../components/ui/Modal';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { PropostaStatusBadge } from '../components/ui/StatusBadge';
-import { formatCurrency, formatDate, initials, nomeExibicaoCliente } from '../utils/format';
+import { formatCurrency, formatDate, initials, nomeExibicaoCliente, linkWhatsApp } from '../utils/format';
 import type { Cliente } from '../types';
 
 type Aba = 'visao_geral' | 'historico' | 'propostas' | 'tarefas';
@@ -79,6 +80,7 @@ export default function ClienteDetalhes() {
     );
   }
 
+  const whatsapp = linkWhatsApp(cliente.whatsapp || cliente.telefone);
   const historico = historicoService.listarPorCliente(id);
   const propostas = propostaService.listarPorCliente(id);
   const eventos = agendaService.listarPorCliente(id);
@@ -116,7 +118,7 @@ export default function ClienteDetalhes() {
 
       <div className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-lg font-semibold text-zaz-purple">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent-soft text-lg font-semibold text-zaz-purple">
             {initials(nomeExibicaoCliente(cliente)) || <Store size={22} />}
           </div>
           <div>
@@ -145,6 +147,11 @@ export default function ClienteDetalhes() {
         <button onClick={abrirSimuladorExterno} className="btn-primary">
           <Calculator size={15} /> Abrir simulador <ExternalLink size={13} className="opacity-70" />
         </button>
+        {whatsapp && (
+          <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="btn-secondary text-brand-green hover:bg-green-50">
+            <MessageCircle size={15} /> WhatsApp
+          </a>
+        )}
         <button onClick={() => navigate(`/propostas?novaPara=${id}`)} className="btn-secondary">
           <FileText size={15} /> Nova proposta
         </button>
