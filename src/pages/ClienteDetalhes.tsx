@@ -30,6 +30,7 @@ import { Modal } from '../components/ui/Modal';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { PropostaStatusBadge } from '../components/ui/StatusBadge';
 import { formatCurrency, formatDate, initials, nomeExibicaoCliente, linkWhatsApp } from '../utils/format';
+import { BotaoCopiar } from '../components/ui/BotaoCopiar';
 import type { Cliente } from '../types';
 
 type Aba = 'visao_geral' | 'historico' | 'propostas' | 'tarefas';
@@ -127,7 +128,7 @@ export default function ClienteDetalhes() {
               <ClienteStatusBadge status={cliente.status} />
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-soft">
-              <span className="flex items-center gap-1"><Phone size={12} /> {cliente.telefone}</span>
+              <span className="flex items-center gap-1"><Phone size={12} /> {cliente.telefone}<BotaoCopiar valor={cliente.telefone} titulo="Copiar telefone" /></span>
               <span className="flex items-center gap-1"><Mail size={12} /> {cliente.email}</span>
               <span className="flex items-center gap-1"><MapPin size={12} /> {cliente.cidade} - {cliente.estado}</span>
             </div>

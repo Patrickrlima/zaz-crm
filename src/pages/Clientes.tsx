@@ -10,6 +10,7 @@ import { Modal } from '../components/ui/Modal';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { EmptyState } from '../components/ui/EmptyState';
 import { ClienteStatusBadge } from '../components/ui/StatusBadge';
+import { BotaoCopiar } from '../components/ui/BotaoCopiar';
 import { clienteService } from '../services/clienteService';
 import { initials, nomeExibicaoCliente, linkWhatsApp } from '../utils/format';
 import type { Cliente, StatusCliente } from '../types';
@@ -206,6 +207,7 @@ export default function Clientes() {
                 </div>
                 <span className="hidden shrink-0 items-center gap-1 text-xs text-ink-soft sm:flex">
                   <Phone size={12} className="text-ink-faint" /> {cliente.telefone || '—'}
+                  {cliente.telefone && <BotaoCopiar valor={cliente.telefone} titulo="Copiar telefone" />}
                 </span>
                 <ClienteStatusBadge status={cliente.status} />
               </>

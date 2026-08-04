@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Store, Phone, MapPin, MessageCircle } from 'lucide-react';
 import type { Cliente } from '../../types';
 import { ClienteStatusBadge } from '../ui/StatusBadge';
+import { BotaoCopiar } from '../ui/BotaoCopiar';
 import { initials, nomeExibicaoCliente, linkWhatsApp } from '../../utils/format';
 
 export function ClienteCard({ cliente }: { cliente: Cliente }) {
@@ -34,6 +35,7 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
           <span className="flex min-w-0 items-center gap-1.5">
             <Phone size={13} className="shrink-0 text-ink-faint" />
             <span className="truncate">{cliente.telefone}</span>
+            <BotaoCopiar valor={cliente.telefone} titulo="Copiar telefone" />
           </span>
           {whatsapp && (
             <a
