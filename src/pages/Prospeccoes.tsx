@@ -18,12 +18,17 @@ export default function Prospeccoes() {
     carregar();
   }
 
+  function handleExcluirClientes(ids: string[]) {
+    clienteService.removerVarios(ids);
+    carregar();
+  }
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-ink-soft">
         Arraste os cartões entre as colunas para atualizar o estágio de cada cliente no funil de vendas.
       </p>
-      <KanbanBoard clientes={clientes} onMudarStatus={handleMudarStatus} />
+      <KanbanBoard clientes={clientes} onMudarStatus={handleMudarStatus} onExcluirClientes={handleExcluirClientes} />
     </div>
   );
 }

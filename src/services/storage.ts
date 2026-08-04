@@ -15,6 +15,7 @@ export const STORAGE_KEYS = {
   simulacoes: 'zaz_crm_simulacoes',
   configuracoes: 'zaz_crm_configuracoes',
   usuario: 'zaz_crm_usuario',
+  kanbanColunas: 'zaz_crm_kanban_colunas',
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

@@ -64,6 +64,26 @@ export const clienteService = {
     }
   },
 
+  /** Remove vários clientes de uma vez, numa única gravação (evita corrida de sincronização em massa). */
+  removerVarios(ids: string[]): void {
+    const idsSet = new Set(ids);
+    const removidos = this.listar().filter((c) => idsSet.has(c.id));
+    const restantes = storage.list<Cliente>(STORAGE_KEYS.clientes).filter((c) => !idsSet.has(c.id));
+    storage.save(STORAGE_KEYS.clientes, restantes);
+
+    if (removidos.length > 0) {
+      const historicoAtual = storage.list(STORAGE_KEYS.historico);
+      const novosRegistros = removidos.map((cliente) => ({
+        id: generateId('hist'),
+        tipo: 'exclusao' as const,
+        titulo: 'Exclusão de cliente',
+        descricao: `${nomeExibicaoCliente(cliente)} foi removido da base de clientes.`,
+        data: new Date().toISOString(),
+      }));
+      storage.save(STORAGE_KEYS.historico, [...novosRegistros, ...historicoAtual]);
+    }
+  },
+
   contar(): number {
     return this.listar().length;
   },

@@ -260,7 +260,7 @@ export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
             type="number"
             step="0.01"
             className="input-base"
-            {...register('faturamentoEstimado', { valueAsNumber: true })}
+            {...register('faturamentoEstimado', { setValueAs: (v: string) => (v === '' ? undefined : Number(v)) })}
           />
         </div>
         <div>
@@ -269,7 +269,7 @@ export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
             type="number"
             step="0.01"
             className="input-base"
-            {...register('ticketMedio', { valueAsNumber: true })}
+            {...register('ticketMedio', { setValueAs: (v: string) => (v === '' ? undefined : Number(v)) })}
           />
         </div>
         <div>
@@ -279,7 +279,7 @@ export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
             step="0.01"
             className="input-base"
             placeholder="Valor que o cliente se comprometeu a transacionar"
-            {...register('mcvComprometido', { valueAsNumber: true })}
+            {...register('mcvComprometido', { setValueAs: (v: string) => (v === '' ? undefined : Number(v)) })}
           />
         </div>
         <div>
@@ -289,7 +289,7 @@ export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
             step="0.01"
             className="input-base"
             placeholder="Valor já transacionado na maquininha"
-            {...register('tpvAtual', { valueAsNumber: true })}
+            {...register('tpvAtual', { setValueAs: (v: string) => (v === '' ? undefined : Number(v)) })}
           />
         </div>
 

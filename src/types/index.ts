@@ -9,13 +9,23 @@ export interface Usuario {
 }
 
 // ===================== Cliente =====================
-export type StatusCliente =
-  | 'novo_lead'
-  | 'em_contato'
-  | 'negociacao'
-  | 'proposta_enviada'
-  | 'fechado'
-  | 'perdido';
+/**
+ * O status de um cliente é um texto livre (não um enum fechado) para permitir
+ * colunas personalizadas no Kanban de Prospecções. As 6 constantes abaixo
+ * continuam sendo os valores padrão usados no cadastro, nos filtros e nos
+ * gráficos (Dashboard, Relatórios) — colunas extras criadas no Kanban só
+ * aparecem lá, sem afetar essas outras telas.
+ */
+export type StatusCliente = string;
+
+export const STATUS_CLIENTE_PADRAO = {
+  novoLead: 'novo_lead',
+  emContato: 'em_contato',
+  negociacao: 'negociacao',
+  propostaEnviada: 'proposta_enviada',
+  fechado: 'fechado',
+  perdido: 'perdido',
+} as const;
 
 export interface Cliente {
   id: string;
@@ -48,7 +58,7 @@ export interface Cliente {
   dataCadastro: string; // ISO
 }
 
-export const STATUS_CLIENTE_LABEL: Record<StatusCliente, string> = {
+export const STATUS_CLIENTE_LABEL: Record<string, string> = {
   novo_lead: 'Novo lead',
   em_contato: 'Em contato',
   negociacao: 'Negociação',
@@ -57,7 +67,7 @@ export const STATUS_CLIENTE_LABEL: Record<StatusCliente, string> = {
   perdido: 'Perdido',
 };
 
-export const STATUS_CLIENTE_COLOR: Record<StatusCliente, { bg: string; text: string; dot: string }> = {
+export const STATUS_CLIENTE_COLOR: Record<string, { bg: string; text: string; dot: string }> = {
   novo_lead: { bg: 'bg-blue-50', text: 'text-blue-600', dot: 'bg-blue-500' },
   em_contato: { bg: 'bg-amber-50', text: 'text-amber-600', dot: 'bg-amber-500' },
   negociacao: { bg: 'bg-teal-50', text: 'text-teal-600', dot: 'bg-teal-500' },
@@ -65,6 +75,9 @@ export const STATUS_CLIENTE_COLOR: Record<StatusCliente, { bg: string; text: str
   fechado: { bg: 'bg-green-50', text: 'text-green-600', dot: 'bg-green-500' },
   perdido: { bg: 'bg-red-50', text: 'text-red-600', dot: 'bg-red-500' },
 };
+
+/** Cor de reserva para colunas personalizadas do Kanban sem cor própria definida. */
+export const STATUS_CLIENTE_COLOR_PADRAO = { bg: 'bg-gray-100', text: 'text-gray-600', dot: 'bg-gray-400' };
 
 // ===================== Agenda =====================
 export type TipoEvento = 'visita' | 'ligacao' | 'retorno' | 'reuniao' | 'treinamento' | 'proposta';

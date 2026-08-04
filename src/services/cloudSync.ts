@@ -32,6 +32,7 @@ const CHAVES_SINCRONIZADAS: StorageKey[] = [
   STORAGE_KEYS.propostas,
   STORAGE_KEYS.simulacoes,
   STORAGE_KEYS.usuario,
+  STORAGE_KEYS.kanbanColunas,
 ];
 
 let canal: RealtimeChannel | null = null;
