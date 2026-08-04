@@ -17,7 +17,7 @@ export function Resultado({ resultado }: { resultado: ResultadoSimulacao | null 
     <div className="card p-5">
       <h3 className="mb-4 font-semibold text-ink">Resultado</h3>
 
-      <div className="rounded-xl bg-purple-50 p-4 text-center">
+      <div className="rounded-xl bg-accent-soft p-4 text-center">
         <p className="text-xs font-medium text-zaz-purple">Valor líquido a receber</p>
         <p className="mt-1 text-3xl font-semibold text-zaz-purple">{formatCurrency(resultado.valorLiquido)}</p>
       </div>

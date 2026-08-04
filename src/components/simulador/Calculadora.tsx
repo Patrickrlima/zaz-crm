@@ -57,7 +57,7 @@ export function Calculadora({
                 onClick={() => onFormaPagamentoChange(f.key)}
                 className={`rounded-xl border px-3 py-2.5 text-xs font-medium transition-colors ${
                   formaPagamento === f.key
-                    ? 'border-zaz-purple bg-purple-50 text-zaz-purple'
+                    ? 'border-zaz-purple bg-accent-soft text-zaz-purple'
                     : 'border-gray-200 text-ink-soft hover:bg-surface-alt'
                 }`}
               >
