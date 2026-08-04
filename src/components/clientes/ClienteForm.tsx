@@ -27,7 +27,7 @@ const schema = z.object({
   bairro: z.string(),
   cep: z.string(),
   segmento: z.string(),
-  status: z.enum(['novo_lead', 'em_contato', 'negociacao', 'proposta_enviada', 'fechado', 'perdido']),
+  status: z.string(),
   responsavel: z.string(),
   observacoes: z.string(),
   faturamentoEstimado: z.number().optional(),
