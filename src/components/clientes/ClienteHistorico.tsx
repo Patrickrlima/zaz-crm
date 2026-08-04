@@ -7,7 +7,7 @@ const CORES: Record<RegistroHistorico['tipo'], string> = {
   cadastro: 'bg-blue-500',
   edicao: 'bg-amber-500',
   ligacao: 'bg-green-500',
-  visita: 'bg-purple-500',
+  visita: 'bg-accent-soft0',
   proposta: 'bg-indigo-500',
   simulacao: 'bg-cyan-500',
   conclusao: 'bg-emerald-500',
