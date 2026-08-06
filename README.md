@@ -1,4 +1,4 @@
-# Central do Vendedor — ZAZ CRM
+# Central do Vendedor — ZAZ CRM.
 
 Plataforma de CRM para vendedores externos da ZAZ Vendas / Vero Banrisul, construída como **PWA (Progressive Web App)**: funciona no navegador, pode ser instalada como aplicativo no celular e no computador, e sincroniza dados em tempo real entre todos os dispositivos do vendedor.
 
