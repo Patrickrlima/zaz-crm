@@ -3,11 +3,11 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Search, Loader2 } from 'lucide-react';
-import { STATUS_CLIENTE_LABEL, KANBAN_COLUNAS } from '../../types';
 import type { Cliente } from '../../types';
 import { formatCNPJ, formatPhone } from '../../utils/format';
 import { cnpjService, cnpjValido, CNPJNaoEncontradoError, type DadosCNPJ } from '../../services/cnpjService';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { kanbanColunaService, type ColunaKanban } from '../../services/kanbanColunaService';
 
 // Todos os campos são opcionais na prática: nenhum tem validação de
 // obrigatoriedade (sem .min()), então o cadastro pode ser salvo mesmo
@@ -44,11 +44,14 @@ const ESTADOS_BR = [
 
 interface ClienteFormProps {
   cliente?: Cliente;
+  colunas?: ColunaKanban[];
+  statusInicial?: string;
   onSubmit: (values: ClienteFormValues) => void;
   onCancel: () => void;
 }
 
-export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
+export function ClienteForm({ cliente, colunas, statusInicial, onSubmit, onCancel }: ClienteFormProps) {
+  const colunasDisponiveis = colunas ?? kanbanColunaService.listar();
   const {
     register,
     handleSubmit,
@@ -74,7 +77,7 @@ export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
           bairro: '',
           cep: '',
           segmento: '',
-          status: 'novo_lead',
+          status: statusInicial ?? colunasDisponiveis[0]?.id ?? 'novo_lead',
           responsavel: '',
           observacoes: '',
         },
@@ -242,9 +245,9 @@ export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
         <div>
           <label className="mb-1.5 block text-sm font-medium text-ink">Status</label>
           <select className="input-base" {...register('status')}>
-            {KANBAN_COLUNAS.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_CLIENTE_LABEL[s]}
+            {colunasDisponiveis.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
               </option>
             ))}
           </select>
