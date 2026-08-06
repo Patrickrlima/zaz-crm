@@ -75,7 +75,7 @@ Abra o endereço mostrado no terminal (ex: `http://localhost:5173/zaz-crm/`).
 4. Em **Authentication → URL Configuration**, defina a Site URL e adicione a URL do GitHub Pages em Redirect URLs (necessário para o link de recuperação de senha funcionar).
 5. Copie **Project URL** e **anon public key** (Project Settings → API) para o `.env`.
 
-Sem essas variáveis configuradas, o app funciona normalmente em modo local (sem login, sem sincronização).
+Sem essas variáveis configuradas, o app funciona normalmente  em modo local (sem login, sem sincronização).
 
 ## Build e deploy
 
