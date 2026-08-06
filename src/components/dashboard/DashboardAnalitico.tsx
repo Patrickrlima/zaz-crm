@@ -12,7 +12,6 @@ import {
 import { Building2, DollarSign, TrendingUp, Target, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
 import type { Cliente, Proposta, RegistroHistorico } from '../../types';
 import { formatCurrency, formatDate, nomeExibicaoCliente } from '../../utils/format';
-import { FechamentosMes } from './FechamentosMes';
 
 interface DashboardAnaliticoProps {
   clientes: Cliente[];
@@ -161,11 +160,6 @@ export function DashboardAnalitico({ clientes, propostas, historico }: Dashboard
           label="TPV projetado"
           valor={formatCurrency(tpvProjetado)}
         />
-      </div>
-
-      <div>
-        <h3 className="mb-3 font-semibold text-ink">Fechamentos do mês</h3>
-        <FechamentosMes clientes={clientes} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">

@@ -23,9 +23,6 @@ export const STATUS_CLIENTE_PADRAO = {
   emContato: 'em_contato',
   negociacao: 'negociacao',
   propostaEnviada: 'proposta_enviada',
-  /** Clientes fechados dentro do mês corrente (funil comercial). Some da coluna "fechado" ao virar o mês. */
-  fechamentoMes: 'fechamento_mes',
-  /** Pós-venda: clientes fechados em meses anteriores, já em acompanhamento. */
   fechado: 'fechado',
   perdido: 'perdido',
 } as const;
@@ -58,8 +55,6 @@ export interface Cliente {
   dataAbertura?: string;
   /** Cliente vindo da planilha de pós-venda (conta nas métricas do Dashboard Analítico). */
   posVenda?: boolean;
-  /** Data em que o cliente entrou na coluna "Fechamentos do Mês" (usada nos indicadores do Dashboard). */
-  dataFechamento?: string; // ISO
   dataCadastro: string; // ISO
 }
 
@@ -68,7 +63,6 @@ export const STATUS_CLIENTE_LABEL: Record<string, string> = {
   em_contato: 'Em contato',
   negociacao: 'Negociação',
   proposta_enviada: 'Proposta enviada',
-  fechamento_mes: 'Fechamentos do Mês',
   fechado: 'Fechado',
   perdido: 'Perdido',
 };
@@ -78,7 +72,6 @@ export const STATUS_CLIENTE_COLOR: Record<string, { bg: string; text: string; do
   em_contato: { bg: 'bg-amber-50', text: 'text-amber-600', dot: 'bg-amber-500' },
   negociacao: { bg: 'bg-teal-50', text: 'text-teal-600', dot: 'bg-teal-500' },
   proposta_enviada: { bg: 'bg-indigo-50', text: 'text-indigo-600', dot: 'bg-indigo-500' },
-  fechamento_mes: { bg: 'bg-emerald-50', text: 'text-emerald-600', dot: 'bg-emerald-500' },
   fechado: { bg: 'bg-green-50', text: 'text-green-600', dot: 'bg-green-500' },
   perdido: { bg: 'bg-red-50', text: 'text-red-600', dot: 'bg-red-500' },
 };
@@ -208,7 +201,6 @@ export const KANBAN_COLUNAS: StatusCliente[] = [
   'em_contato',
   'negociacao',
   'proposta_enviada',
-  'fechamento_mes',
   'fechado',
   'perdido',
 ];

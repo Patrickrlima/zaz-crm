@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useCloudSyncRefresh } from '../hooks/useCloudSyncRefresh';
 import { KanbanBoard } from '../components/prospeccoes/KanbanBoard';
-import { clienteService, type NovoClienteInput } from '../services/clienteService';
-import type { ClienteFormValues } from '../components/clientes/ClienteForm';
+import { clienteService } from '../services/clienteService';
 import type { Cliente, StatusCliente } from '../types';
 
 export default function Prospeccoes() {
@@ -24,23 +23,12 @@ export default function Prospeccoes() {
     carregar();
   }
 
-  function handleCriarCliente(values: ClienteFormValues) {
-    clienteService.criar(values as NovoClienteInput);
-    carregar();
-  }
-
   return (
     <div className="space-y-4">
       <p className="text-sm text-ink-soft">
-        Arraste os cartões entre as colunas para atualizar o estágio de cada cliente no funil de vendas, ou use o
-        botão "Adicionar Cliente" para cadastrar manualmente direto numa coluna.
+        Arraste os cartões entre as colunas para atualizar o estágio de cada cliente no funil de vendas.
       </p>
-      <KanbanBoard
-        clientes={clientes}
-        onMudarStatus={handleMudarStatus}
-        onExcluirClientes={handleExcluirClientes}
-        onCriarCliente={handleCriarCliente}
-      />
+      <KanbanBoard clientes={clientes} onMudarStatus={handleMudarStatus} onExcluirClientes={handleExcluirClientes} />
     </div>
   );
 }
