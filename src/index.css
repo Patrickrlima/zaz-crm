@@ -62,6 +62,39 @@
     background: transparent;
   }
 
+  /* Kanban de Prospecções: barra de rolagem horizontal sempre visível (não fica
+     "overlay" escondida, como em macOS/alguns navegadores), para deixar claro que
+     dá pra navegar entre as colunas mesmo quando há muitas. */
+  .kanban-trilho {
+    scrollbar-gutter: stable;
+  }
+  .kanban-trilho::-webkit-scrollbar {
+    height: 10px;
+  }
+  .kanban-trilho::-webkit-scrollbar-thumb {
+    background: #D7D9E2;
+    border-radius: 999px;
+  }
+  html.dark .kanban-trilho::-webkit-scrollbar-thumb {
+    background: #33374A;
+  }
+
+  /* Barra de rolagem extra em cima do Kanban, espelhando a de baixo, para
+     dar acesso rápido à rolagem lateral sem precisar descer a página. */
+  .kanban-barra-topo {
+    scrollbar-gutter: stable;
+  }
+  .kanban-barra-topo::-webkit-scrollbar {
+    height: 10px;
+  }
+  .kanban-barra-topo::-webkit-scrollbar-thumb {
+    background: #D7D9E2;
+    border-radius: 999px;
+  }
+  html.dark .kanban-barra-topo::-webkit-scrollbar-thumb {
+    background: #33374A;
+  }
+
   /* ===================== Modo escuro ===================== */
   /* Sobrescreve as variáveis de cor do tema quando a classe .dark
      está presente em <html>. Como os utilitários do Tailwind (bg-surface,

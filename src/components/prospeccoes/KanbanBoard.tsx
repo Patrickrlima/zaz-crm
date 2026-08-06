@@ -1,20 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, MapPin, ArrowLeftRight, Plus, Pencil, Check, X, CheckSquare, Square, Trash2 } from 'lucide-react';
+import {
+  Phone,
+  MapPin,
+  ArrowLeftRight,
+  Plus,
+  Pencil,
+  Check,
+  X,
+  CheckSquare,
+  Square,
+  Trash2,
+  UserPlus,
+} from 'lucide-react';
 import type { Cliente, StatusCliente } from '../../types';
 import { nomeExibicaoCliente } from '../../utils/format';
 import { kanbanColunaService, type ColunaKanban } from '../../services/kanbanColunaService';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { Modal } from '../ui/Modal';
+import { ClienteForm, type ClienteFormValues } from '../clientes/ClienteForm';
 
 interface KanbanBoardProps {
   clientes: Cliente[];
   onMudarStatus: (clienteId: string, status: StatusCliente) => void;
   onExcluirClientes: (ids: string[]) => void;
+  onCriarCliente: (values: ClienteFormValues) => void;
 }
 
 const LARGURA_STORAGE_KEY = 'zaz_crm_kanban_compacto';
 
-export function KanbanBoard({ clientes, onMudarStatus, onExcluirClientes }: KanbanBoardProps) {
+export function KanbanBoard({ clientes, onMudarStatus, onExcluirClientes, onCriarCliente }: KanbanBoardProps) {
   const [colunas, setColunas] = useState<ColunaKanban[]>(() => kanbanColunaService.listar());
   const [arrastandoId, setArrastandoId] = useState<string | null>(null);
   const [colunaSobre, setColunaSobre] = useState<string | null>(null);
@@ -26,6 +41,58 @@ export function KanbanBoard({ clientes, onMudarStatus, onExcluirClientes }: Kanb
   const [modoSelecao, setModoSelecao] = useState(false);
   const [selecionados, setSelecionados] = useState<Set<string>>(new Set());
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [statusNovoCliente, setStatusNovoCliente] = useState<string | null>(null);
+  const trilhoRef = useRef<HTMLDivElement>(null);
+  const barraTopoRef = useRef<HTMLDivElement>(null);
+  const [larguraConteudo, setLarguraConteudo] = useState(0);
+  const sincronizandoRef = useRef<'trilho' | 'topo' | null>(null);
+
+  // Rolagem horizontal fluida com a roda do mouse (sem precisar segurar Shift),
+  // além do scroll nativo com Shift e da barra de rolagem inferior.
+  function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
+    const el = trilhoRef.current;
+    if (!el || e.shiftKey) return; // Shift+scroll já é tratado nativamente pelo navegador.
+    const deltaHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (deltaHorizontal === 0) return;
+    el.scrollLeft += deltaHorizontal;
+    e.preventDefault();
+  }
+
+  // Mantém a barra de rolagem de cima do mesmo "tamanho" que o conteúdo real
+  // do quadro (colunas + botão de nova coluna), para que arrastá-la corresponda
+  // exatamente à rolagem do quadro logo abaixo.
+  useEffect(() => {
+    const el = trilhoRef.current;
+    if (!el) return;
+    const atualizarLargura = () => setLarguraConteudo(el.scrollWidth);
+    atualizarLargura();
+    const observer = new ResizeObserver(atualizarLargura);
+    observer.observe(el);
+    Array.from(el.children).forEach((filho) => observer.observe(filho));
+    return () => observer.disconnect();
+  }, [colunas, criandoColuna, compacto]);
+
+  // Sincroniza a rolagem nos dois sentidos (barra de cima <-> quadro),
+  // usando uma flag para não entrar em loop de "onScroll" chamando "onScroll".
+  function handleScrollTopo() {
+    if (sincronizandoRef.current === 'trilho') {
+      sincronizandoRef.current = null;
+      return;
+    }
+    if (!trilhoRef.current || !barraTopoRef.current) return;
+    sincronizandoRef.current = 'topo';
+    trilhoRef.current.scrollLeft = barraTopoRef.current.scrollLeft;
+  }
+
+  function handleScrollTrilho() {
+    if (sincronizandoRef.current === 'topo') {
+      sincronizandoRef.current = null;
+      return;
+    }
+    if (!trilhoRef.current || !barraTopoRef.current) return;
+    sincronizandoRef.current = 'trilho';
+    barraTopoRef.current.scrollLeft = trilhoRef.current.scrollLeft;
+  }
 
   function alternarCompacto() {
     setCompacto((atual) => {
@@ -80,6 +147,11 @@ export function KanbanBoard({ clientes, onMudarStatus, onExcluirClientes }: Kanb
     sairDoModoSelecao();
   }
 
+  function handleCriarCliente(values: ClienteFormValues) {
+    onCriarCliente(values);
+    setStatusNovoCliente(null);
+  }
+
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
@@ -107,9 +179,33 @@ export function KanbanBoard({ clientes, onMudarStatus, onExcluirClientes }: Kanb
           <ArrowLeftRight size={13} />
           {compacto ? 'Colunas normais' : 'Colunas mais juntas'}
         </button>
+        <button
+          type="button"
+          onClick={() => setStatusNovoCliente(colunas[0]?.id ?? 'novo_lead')}
+          className="btn-primary text-xs"
+        >
+          <UserPlus size={13} /> Adicionar Cliente
+        </button>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-4">
+      {/* Barra de rolagem de cima: mesma largura do conteúdo do quadro, permitindo
+          arrastar com o mouse sem precisar descer até a barra nativa embaixo. */}
+      <div
+        ref={barraTopoRef}
+        onScroll={handleScrollTopo}
+        className="kanban-barra-topo mb-1.5 overflow-x-auto overflow-y-hidden"
+        style={{ height: 14 }}
+        aria-hidden="true"
+      >
+        <div style={{ width: larguraConteudo, height: 1 }} />
+      </div>
+
+      <div
+        ref={trilhoRef}
+        onWheel={handleWheel}
+        onScroll={handleScrollTrilho}
+        className="kanban-trilho flex gap-3 overflow-x-auto pb-4"
+      >
         {colunas.map((coluna) => {
           const itens = clientes.filter((c) => c.status === coluna.id);
           const isDropTarget = colunaSobre === coluna.id;
@@ -160,6 +256,13 @@ export function KanbanBoard({ clientes, onMudarStatus, onExcluirClientes }: Kanb
                       <p className="truncate text-sm font-semibold text-ink">{coluna.label}</p>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        onClick={() => setStatusNovoCliente(coluna.id)}
+                        className="rounded p-1 text-ink-faint hover:bg-white hover:text-zaz-purple"
+                        title="Adicionar cliente nesta coluna"
+                      >
+                        <UserPlus size={12} />
+                      </button>
                       <button
                         onClick={() => iniciarRenomear(coluna)}
                         className="rounded p-1 text-ink-faint hover:bg-white hover:text-ink-soft"
@@ -269,6 +372,15 @@ export function KanbanBoard({ clientes, onMudarStatus, onExcluirClientes }: Kanb
         onConfirm={confirmarExclusaoSelecionados}
         onCancel={() => setConfirmandoExclusao(false)}
       />
+
+      <Modal open={statusNovoCliente !== null} onClose={() => setStatusNovoCliente(null)} title="Adicionar cliente" size="lg">
+        <ClienteForm
+          colunas={colunas}
+          statusInicial={statusNovoCliente ?? undefined}
+          onSubmit={handleCriarCliente}
+          onCancel={() => setStatusNovoCliente(null)}
+        />
+      </Modal>
     </div>
   );
 }
