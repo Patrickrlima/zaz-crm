@@ -16,9 +16,9 @@ const TIPO_COLOR: Record<EventoAgenda['tipo'], string> = {
   visita: 'bg-blue-50 text-brand-blue',
   ligacao: 'bg-green-50 text-brand-green',
   retorno: 'bg-red-50 text-brand-red',
-  reuniao: 'bg-accent-soft text-zaz-purple',
+  reuniao: 'bg-purple-50 text-zaz-purple',
   treinamento: 'bg-indigo-50 text-indigo-600',
-  proposta: 'bg-accent-soft text-brand-orange',
+  proposta: 'bg-orange-50 text-brand-orange',
 };
 
 interface AgendaCardProps {

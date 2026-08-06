@@ -34,7 +34,7 @@ export function Resumo({ valorVenda, taxas, formaSelecionada }: ResumoProps) {
             <div
               key={forma}
               className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm ${
-                ativa ? 'bg-accent-soft ring-1 ring-zaz-purple/30' : 'bg-surface-alt'
+                ativa ? 'bg-purple-50 ring-1 ring-zaz-purple/30' : 'bg-surface-alt'
               }`}
             >
               <span className={ativa ? 'font-medium text-zaz-purple' : 'text-ink-soft'}>{LABELS[forma]}</span>

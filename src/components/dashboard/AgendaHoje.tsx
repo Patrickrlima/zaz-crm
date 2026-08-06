@@ -69,7 +69,7 @@ export function AgendaHoje({ eventos, onConcluir, onNovaAtividade }: AgendaHojeP
 
       <button
         onClick={onNovaAtividade}
-        className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-gray-200 py-2.5 text-sm font-medium text-zaz-purple hover:bg-accent-soft/50"
+        className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-gray-200 py-2.5 text-sm font-medium text-zaz-purple hover:bg-orange-50/50"
       >
         <Plus size={16} /> Adicionar atividade
       </button>

@@ -40,7 +40,7 @@ export function DashboardCards({
     },
     {
       icon: CalendarClock,
-      iconBg: 'bg-accent-soft',
+      iconBg: 'bg-orange-50',
       iconColor: 'text-brand-orange',
       label: 'Retornos hoje',
       value: retornosHoje,
@@ -49,7 +49,7 @@ export function DashboardCards({
     },
     {
       icon: Handshake,
-      iconBg: 'bg-accent-soft',
+      iconBg: 'bg-orange-50',
       iconColor: 'text-zaz-purple',
       label: 'Negociações',
       value: negociacoes,
