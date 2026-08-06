@@ -29,6 +29,7 @@ const CORES_STATUS: Record<string, string> = {
   em_contato: '#F59E0B',
   negociacao: '#0D9488',
   proposta_enviada: '#6366F1',
+  fechamento_mes: '#10B981',
   fechado: '#16A34A',
   perdido: '#9CA3AF',
 };
@@ -122,7 +123,8 @@ export default function Relatorios() {
   );
 
   const taxaConversao = useMemo(() => {
-    const fechados = clientes.filter((c) => c.status === 'fechado').length;
+    // Conta tanto os fechamentos do mês corrente quanto o pós-venda (fechados de meses anteriores).
+    const fechados = clientes.filter((c) => c.status === 'fechado' || c.status === 'fechamento_mes').length;
     return clientes.length > 0 ? ((fechados / clientes.length) * 100).toFixed(1) : '0.0';
   }, [clientes]);
 

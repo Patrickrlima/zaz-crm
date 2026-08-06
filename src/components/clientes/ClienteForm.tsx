@@ -8,6 +8,7 @@ import type { Cliente } from '../../types';
 import { formatCNPJ, formatPhone } from '../../utils/format';
 import { cnpjService, cnpjValido, CNPJNaoEncontradoError, type DadosCNPJ } from '../../services/cnpjService';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import type { ColunaKanban } from '../../services/kanbanColunaService';
 
 // Todos os campos são opcionais na prática: nenhum tem validação de
 // obrigatoriedade (sem .min()), então o cadastro pode ser salvo mesmo
@@ -46,9 +47,13 @@ interface ClienteFormProps {
   cliente?: Cliente;
   onSubmit: (values: ClienteFormValues) => void;
   onCancel: () => void;
+  /** Colunas do Kanban a exibir no seletor de status (inclui colunas personalizadas). Se omitido, usa as 7 colunas padrão. */
+  colunas?: ColunaKanban[];
+  /** Coluna pré-selecionada ao abrir o formulário (ex.: ao clicar em "Adicionar cliente" numa coluna específica). */
+  statusInicial?: string;
 }
 
-export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
+export function ClienteForm({ cliente, onSubmit, onCancel, colunas, statusInicial }: ClienteFormProps) {
   const {
     register,
     handleSubmit,
@@ -74,11 +79,14 @@ export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
           bairro: '',
           cep: '',
           segmento: '',
-          status: 'novo_lead',
+          status: statusInicial ?? colunas?.[0]?.id ?? 'novo_lead',
           responsavel: '',
           observacoes: '',
         },
   });
+
+  const opcoesStatus: { id: string; label: string }[] =
+    colunas ?? KANBAN_COLUNAS.map((s) => ({ id: s, label: STATUS_CLIENTE_LABEL[s] }));
 
   const [confirmandoBusca, setConfirmandoBusca] = useState(false);
   const [buscandoCNPJ, setBuscandoCNPJ] = useState(false);
@@ -240,11 +248,11 @@ export function ClienteForm({ cliente, onSubmit, onCancel }: ClienteFormProps) {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-ink">Status</label>
+          <label className="mb-1.5 block text-sm font-medium text-ink">Coluna do Kanban</label>
           <select className="input-base" {...register('status')}>
-            {KANBAN_COLUNAS.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_CLIENTE_LABEL[s]}
+            {opcoesStatus.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.label}
               </option>
             ))}
           </select>

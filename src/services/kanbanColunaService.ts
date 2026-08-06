@@ -1,6 +1,6 @@
 import { storage, STORAGE_KEYS } from './storage';
 import { generateId } from '../utils/id';
-import { STATUS_CLIENTE_LABEL, STATUS_CLIENTE_COLOR, KANBAN_COLUNAS } from '../types';
+import { STATUS_CLIENTE_LABEL, STATUS_CLIENTE_COLOR, STATUS_CLIENTE_PADRAO, KANBAN_COLUNAS } from '../types';
 
 export interface ColunaKanban {
   id: string; // vira o valor salvo em cliente.status
@@ -26,10 +26,33 @@ function colunasPadrao(): ColunaKanban[] {
   }));
 }
 
+/**
+ * Garante que quadros já personalizados pelo usuário (colunas salvas antes desta
+ * atualização) ganhem a nova coluna "Fechamentos do Mês", inserida logo antes da
+ * coluna "Fechado" (ou no fim, se essa não existir). Não mexe em nada além disso.
+ */
+function comColunaDeFechamentoMes(colunas: ColunaKanban[]): ColunaKanban[] {
+  if (colunas.some((c) => c.id === STATUS_CLIENTE_PADRAO.fechamentoMes)) return colunas;
+
+  const nova: ColunaKanban = {
+    id: STATUS_CLIENTE_PADRAO.fechamentoMes,
+    label: STATUS_CLIENTE_LABEL[STATUS_CLIENTE_PADRAO.fechamentoMes],
+    cor: STATUS_CLIENTE_COLOR[STATUS_CLIENTE_PADRAO.fechamentoMes],
+  };
+  const idxFechado = colunas.findIndex((c) => c.id === STATUS_CLIENTE_PADRAO.fechado);
+  return idxFechado === -1
+    ? [...colunas, nova]
+    : [...colunas.slice(0, idxFechado), nova, ...colunas.slice(idxFechado)];
+}
+
 export const kanbanColunaService = {
   listar(): ColunaKanban[] {
     const salvas = storage.get<ColunaKanban[] | null>(CHAVE, null);
-    if (salvas && salvas.length > 0) return salvas;
+    if (salvas && salvas.length > 0) {
+      const atualizadas = comColunaDeFechamentoMes(salvas);
+      if (atualizadas !== salvas) this.salvar(atualizadas);
+      return atualizadas;
+    }
     return colunasPadrao();
   },
 

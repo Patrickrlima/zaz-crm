@@ -7,6 +7,7 @@ import { FunilVendas } from '../components/dashboard/FunilVendas';
 import { UltimosClientes } from '../components/dashboard/UltimosClientes';
 import { RetornosPendentes } from '../components/dashboard/RetornosPendentes';
 import { DashboardAnalitico } from '../components/dashboard/DashboardAnalitico';
+import { FechamentosMes } from '../components/dashboard/FechamentosMes';
 import { Modal } from '../components/ui/Modal';
 import { EventoForm, type EventoFormValues } from '../components/agenda/EventoForm';
 import { clienteService } from '../services/clienteService';
@@ -75,6 +76,11 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <AgendaHoje eventos={eventosHoje} onConcluir={handleConcluir} onNovaAtividade={() => setModalAberto(true)} />
         <FunilVendas clientes={clientes} />
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-sm font-semibold text-ink-soft">Fechamentos do mês</h2>
+        <FechamentosMes clientes={clientes} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">

@@ -6,6 +6,7 @@ const CORES: Record<string, string> = {
   em_contato: '#F59E0B',
   negociacao: '#0D9488',
   proposta_enviada: '#6366F1',
+  fechamento_mes: '#10B981',
   fechado: '#16A34A',
   perdido: '#9CA3AF',
 };

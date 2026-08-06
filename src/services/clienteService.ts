@@ -2,6 +2,7 @@ import { storage, STORAGE_KEYS } from './storage';
 import { generateId } from '../utils/id';
 import { historicoService } from './historicoService';
 import { nomeExibicaoCliente } from '../utils/format';
+import { STATUS_CLIENTE_PADRAO } from '../types';
 import type { Cliente, StatusCliente } from '../types';
 
 export type NovoClienteInput = Omit<Cliente, 'id' | 'dataCadastro'>;
@@ -20,6 +21,9 @@ export const clienteService = {
   criar(input: NovoClienteInput): Cliente {
     const cliente: Cliente = {
       ...input,
+      // Se o cliente já é cadastrado direto na coluna "Fechamentos do Mês", marca a data agora.
+      dataFechamento:
+        input.status === STATUS_CLIENTE_PADRAO.fechamentoMes ? new Date().toISOString() : input.dataFechamento,
       id: generateId('cli'),
       dataCadastro: new Date().toISOString(),
     };
@@ -49,7 +53,26 @@ export const clienteService = {
   },
 
   atualizarStatus(id: string, status: StatusCliente): Cliente | null {
-    return this.atualizar(id, { status });
+    const antes = this.obter(id);
+    const entrandoEmFechamentoMes =
+      status === STATUS_CLIENTE_PADRAO.fechamentoMes && antes?.status !== STATUS_CLIENTE_PADRAO.fechamentoMes;
+
+    const atualizado = this.atualizar(
+      id,
+      entrandoEmFechamentoMes ? { status, dataFechamento: new Date().toISOString() } : { status }
+    );
+
+    if (atualizado && entrandoEmFechamentoMes) {
+      historicoService.registrar({
+        tipo: 'conclusao',
+        titulo: 'Fechamento do mês',
+        descricao: `${nomeExibicaoCliente(atualizado)} foi movido para Fechamentos do Mês.`,
+        clienteId: atualizado.id,
+        clienteNome: nomeExibicaoCliente(atualizado),
+      });
+    }
+
+    return atualizado;
   },
 
   remover(id: string): void {
