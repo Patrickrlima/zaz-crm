@@ -51,10 +51,14 @@ export function KanbanBoard({ clientes, onMudarStatus, onExcluirClientes, onCria
   // além do scroll nativo com Shift e da barra de rolagem inferior.
   function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
     const el = trilhoRef.current;
-    if (!el || e.shiftKey) return; // Shift+scroll já é tratado nativamente pelo navegador.
-    const deltaHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if (deltaHorizontal === 0) return;
-    el.scrollLeft += deltaHorizontal;
+    if (!el) return;
+    // Só assume o controle quando o gesto já é horizontal de verdade
+    // (trackpad ou mouse com rodinha lateral). Rolagem vertical normal do
+    // mouse continua rolando a PÁGINA, não o quadro — a rolagem lateral do
+    // Kanban fica por conta da barra de cima/baixo, do Shift+roda (nativo
+    // do navegador) ou de um gesto horizontal do trackpad.
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    el.scrollLeft += e.deltaX;
     e.preventDefault();
   }
 
