@@ -19,6 +19,7 @@ import {
   Search,
   LogOut,
   UserRound,
+  ListChecks,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { authService } from '../../services/authService';
@@ -26,6 +27,7 @@ import { usuarioService } from '../../services/usuarioService';
 import { agendaService } from '../../services/agendaService';
 import { propostaService } from '../../services/propostaService';
 import { clienteService } from '../../services/clienteService';
+import { acoesService } from '../../services/acoesService';
 import { STORAGE_KEYS } from '../../services/storage';
 import { CLOUD_SYNC_EVENT } from '../../services/cloudSync';
 import { initials } from '../../utils/format';
@@ -42,6 +44,14 @@ interface NavItem {
 
 const NAV_PRINCIPAL: NavItem[] = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  {
+    to: '/acoes',
+    label: 'Ações',
+    icon: ListChecks,
+    badge: () =>
+      acoesService.atividadesDeHoje().length + acoesService.clientesEsquecidos().length + acoesService.propostasParadas().length,
+    badgeCor: 'bg-brand-red',
+  },
   { to: '/clientes', label: 'Clientes', icon: Users },
   { to: '/agenda', label: 'Agenda', icon: Calendar, badge: () => agendaService.retornosPendentes().length, badgeCor: 'bg-brand-red' },
   { to: '/prospeccoes', label: 'Prospecções', icon: Target, badge: () => clienteService.listar().filter((c) => c.status === 'novo_lead').length, badgeCor: 'bg-zaz-purple' },

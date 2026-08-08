@@ -8,6 +8,7 @@ import { usuarioService } from '../../services/usuarioService';
 import { agendaService } from '../../services/agendaService';
 
 const TITLES: Record<string, { title: string; subtitle?: string }> = {
+  '/acoes': { title: 'Ações', subtitle: 'Tudo que precisa da sua atenção, num só lugar' },
   '/clientes': { title: 'Clientes', subtitle: 'Gerencie sua carteira de clientes' },
   '/agenda': { title: 'Agenda', subtitle: 'Suas visitas, ligações e reuniões' },
   '/prospeccoes': { title: 'Prospecções', subtitle: 'Funil de vendas em formato Kanban' },

@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Clientes from './pages/Clientes';
 import ClienteDetalhes from './pages/ClienteDetalhes';
 import Agenda from './pages/Agenda';
+import Acoes from './pages/Acoes';
 import Prospeccoes from './pages/Prospeccoes';
 import PosVenda from './pages/PosVenda';
 import Propostas from './pages/Propostas';
@@ -108,6 +109,7 @@ export default function App() {
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/clientes/:id" element={<ClienteDetalhes />} />
             <Route path="/agenda" element={<Agenda />} />
+            <Route path="/acoes" element={<Acoes />} />
             <Route path="/prospeccoes" element={<Prospeccoes />} />
             <Route path="/pos-venda" element={<PosVenda />} />
             <Route path="/propostas" element={<Propostas />} />
