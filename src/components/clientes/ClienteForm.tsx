@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Search, Loader2 } from 'lucide-react';
 import type { Cliente } from '../../types';
-import { formatCNPJ, formatPhone } from '../../utils/format';
+import { formatCNPJ, formatCPF, formatPhone } from '../../utils/format';
 import { cnpjService, cnpjValido, CNPJNaoEncontradoError, type DadosCNPJ } from '../../services/cnpjService';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { kanbanColunaService, type ColunaKanban } from '../../services/kanbanColunaService';
@@ -17,6 +17,7 @@ const schema = z.object({
   nomeFantasia: z.string(),
   razaoSocial: z.string(),
   cnpj: z.string(),
+  cpf: z.string(),
   telefone: z.string(),
   whatsapp: z.string(),
   email: z.union([z.literal(''), z.string().email('E-mail inválido')]),
@@ -67,6 +68,7 @@ export function ClienteForm({ cliente, colunas, statusInicial, onSubmit, onCance
           nomeFantasia: '',
           razaoSocial: '',
           cnpj: '',
+          cpf: '',
           telefone: '',
           whatsapp: '',
           email: '',
@@ -166,6 +168,22 @@ export function ClienteForm({ cliente, colunas, statusInicial, onSubmit, onCance
           </div>
           {errors.cnpj && <p className="mt-1 text-xs text-brand-red">{errors.cnpj.message}</p>}
           {erroCNPJ && <p className="mt-1 text-xs text-brand-orange">{erroCNPJ}</p>}
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-ink">CPF do responsável</label>
+          <Controller
+            control={control}
+            name="cpf"
+            render={({ field }) => (
+              <input
+                className="input-base"
+                value={field.value}
+                onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                placeholder="000.000.000-00"
+              />
+            )}
+          />
         </div>
 
         <div>

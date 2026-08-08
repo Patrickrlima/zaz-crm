@@ -14,6 +14,8 @@ import {
   ArrowLeft,
   ExternalLink,
   MessageCircle,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { clienteService } from '../services/clienteService';
 import { agendaService } from '../services/agendaService';
@@ -192,7 +194,8 @@ export default function ClienteDetalhes() {
               {aba === 'visao_geral' && (
                 <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
                   <Info label="Razão social" value={cliente.razaoSocial} />
-                  <Info label="CNPJ" value={cliente.cnpj} />
+                  <InfoCopiavel label="CNPJ" value={cliente.cnpj} />
+                  <InfoCopiavel label="CPF do responsável" value={cliente.cpf ?? ''} />
                   <Info label="Segmento" value={cliente.segmento} />
                   <Info
                     label="Faturamento estimado"
@@ -305,6 +308,41 @@ function Info({ label, value }: { label: string; value: string }) {
     <div>
       <p className="text-xs text-ink-faint">{label}</p>
       <p className="mt-0.5 font-medium text-ink">{value}</p>
+    </div>
+  );
+}
+
+/** Igual ao Info, mas com um botão para copiar o valor (usado em CNPJ/CPF). */
+function InfoCopiavel({ label, value }: { label: string; value: string }) {
+  const [copiado, setCopiado] = useState(false);
+
+  async function copiar() {
+    if (!value || value === '—') return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 1500);
+    } catch {
+      // Sem permissão de área de transferência: ignora silenciosamente.
+    }
+  }
+
+  return (
+    <div>
+      <p className="text-xs text-ink-faint">{label}</p>
+      <div className="mt-0.5 flex items-center gap-1.5">
+        <p className="font-medium text-ink">{value || '—'}</p>
+        {value && value !== '—' && (
+          <button
+            type="button"
+            onClick={copiar}
+            className="shrink-0 rounded p-0.5 text-ink-faint hover:bg-surface-alt hover:text-zaz-purple"
+            title={`Copiar ${label.toLowerCase()}`}
+          >
+            {copiado ? <Check size={13} className="text-brand-green" /> : <Copy size={13} />}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

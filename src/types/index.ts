@@ -32,6 +32,7 @@ export interface Cliente {
   nomeFantasia: string;
   razaoSocial: string;
   cnpj: string;
+  cpf?: string;
   telefone: string;
   whatsapp: string;
   email: string;
